@@ -1,0 +1,22 @@
+Click==7.0
+itsdangerous==1.1.0
+Jinja2==2.11.1
+MarkupSafe==1.1.1
+Werkzeug==0.16.1
+
+# ----------------------
+# Flask
+# ----------------------
+flask
+Flask-WTF
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-Script
+Flask-Login
+psycopg2
+
+
+# ----------------------
+# Production Server
+# ----------------------
+gunicorn

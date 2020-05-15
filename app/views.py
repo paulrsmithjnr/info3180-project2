@@ -4,12 +4,14 @@ Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
 Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
+
 import os
+import jwt
 import psycopg2 
 from app import app, db
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
-from app.forms import RegisterForm, LoginForm
+from app.forms import RegisterForm, LoginForm, PostForm
 from app.models import Posts, Users, Likes, Follows
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
@@ -21,7 +23,7 @@ from werkzeug.security import check_password_hash
 @app.route('/api/users/register', methods = ['POST'])
 def register():
     registrationForm = RegisterForm()
-    if request.method == 'POST' and registrationForm.validate_on_submit():
+    if registrationForm.validate_on_submit():
         username = registrationForm.username.data
         password = registrationForm.password.data
         firstName = registrationForm.firstName.data
@@ -32,24 +34,19 @@ def register():
         biography = registrationForm.biography.data
         photo = registrationForm.photo.data
 
-        filename = secure_filename(photo.filename)
+        profile_picture = secure_filename(photo.filename)
         photo.save(os.path.join(
-            app.config['UPLOAD_FOLDER'], filename
+            app.config['UPLOAD_FOLDER'], profile_picture
         ))
 
-        registrationFormData = {
-            "firstname": firstName,
-            "lastname": lastName,
-            "username": username,
-            "password": password,
-            "gender": gender,
-            "email": email,
-            "location": location,
-            "biography": biography,
-            "profile_photo": filename
+        user = Users(username=username, password=password, firstname=firstName, lastname=lastName, gender=gender, email=email, location=location, biography=biography, profile_picture=profile_picture)
+        db.session.add(user)
+        db.session.commit()
+        
+        successMessage = {
+            "message": "User successfully registered"
         }
-
-        return jsonify(registrationFormData=registrationFormData)
+        return jsonify(successMessage=successMessage)
     
     else:
         registrationFormErrorData = {
@@ -58,101 +55,116 @@ def register():
         return jsonify(registrationFormErrorData=registrationFormErrorData)
 
 
-@app.route('/api/auth/login')
+@app.route('/api/auth/login', methods=['POST'])
 def login():
-    return
+    loginform = LoginForm()
+    if loginform.validate_on_submit:
+        username=loginform.username.data
+        password=loginform.password.data
+        user=Users.query.filter_by(username=username).first()
 
-@app.route('/api/auth/logout')
+        if user is not None and check_password_hash(user.password, password):
+            remember_me=False
+            if 'remember_me' in request.form:
+                remember_me=True
+
+            login_user(user, remember=remember_me)
+            payload = {
+                "username": user.username,
+                "password": user.password
+            }
+            encoded_jwt = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256') 
+            successMessage = {
+                "token": encoded_jwt,
+                "message": "User successfully logged in."
+            }
+
+            return jsonify(successMessage=successMessage)
+
+        else:
+            loginError = {
+            "errors": "Username or Password is incorrect."
+            }
+            return jsonify(loginError=loginError)
+    
+    else:
+        loginFormErrorData = {
+            "errors": form_errors(loginform)
+        }
+        return jsonify(loginFormErrorData=loginFormErrorData)
+
+
+@app.route('/api/auth/logout', method=['GET'])
+@login_required
 def logout():
-    return
+    logout_user()
+    successMessage = {
+        "message": "User successfully logged out."
+    }
+    return jsonify(successMessage=successMessage)
 
-@app.route('/api/users/<user_id>/posts')
+@app.route('/api/users/<user_id>/posts', methods=['GET', 'POST'])
+@login_required
 def posts(user_id):
-    return
+    postForm = PostForm()
+    if request.method == 'POST' and postForm.validate_on_submit():
+        
+        photo = postForm.photo.data
+        filename = secure_filename(photo.filename)
+        photo.save(os.path.join(
+            app.config['UPLOAD_FOLDER'], filename
+        ))
+        
+        description = postForm.description.data
+        
+        post = Posts(user_id=user_id, photo=filename)
+        db.session.add(post)
+        db.session.commit()
+        
+        successMessage = {
+            "message": "Successfully created a new post"
+        }
+        return jsonify(successMessage=successMessage)
+    
+    elif request.method == 'GET':
 
-@app.route('/api/users/<user_id>/follow')
+        userPosts = Posts.query.filter_by(user_id=user_id).all()
+        posts = {
+            "posts": userPosts
+        }           
+        return jsonify(userPosts=userPosts)
+
+
+@app.route('/api/users/<user_id>/follow', methods=['POST'])
+@login_required
 def follow(user_id):
-    return
+    follow = Follows(user_id=current_user.user_id, follower_id=user_id)
+    succesMessage = {
+        "message": "You are now following that user"
+    }
+    return jsonify(succesMessage=succesMessage)
 
-@app.route('/api/posts')
+
+@app.route('/api/posts', methods=['GET'])
+@login_required
 def posts():
-    return
+    allPosts = Posts.query.order_by(Posts.id.desc()).all()
+    posts = {
+        "posts": allPosts
+    }
+    return jsonify(posts=posts)
 
-@app.route('/api/posts/<post_id>/like')
+
+@app.route('/api/posts/<post_id>/like',methods=['POST'])
+@login_required
 def like(post_id):
-    return
-
-# def connect_db():
-#  return psycopg2.connect(host="ec2-23-22-156-110.compute-1.amazonaws.com", database="datdia6j8gufho", user="jrwagwsvveqdyq", password="d3b01edc599b779de8e660424263867202089a8783719506324e993913c68e69")
-
-# @app.route('/')
-# def home():
-#     """Render website's home page."""
-#     return render_template('home.html')
-
-
-# @app.route('/about/')
-# def about():
-#     """Render the website's about page."""
-#     return render_template('about.html')
-
-# @app.route('/profile', methods = ['GET', 'POST'])
-# def profile():
-#     """Render the website's profile page."""
-#     profilePage = ProfileForm()
-
-#     if request.method == 'POST':
-#         if profilePage.validate_on_submit():
-
-#             firstName = profilePage.firstName.data
-#             lastName = profilePage.lastName.data
-#             gender = profilePage.gender.data
-#             email = profilePage.email.data
-#             location = profilePage.location.data
-#             biography = profilePage.biography.data
-#             photo = profilePage.photo.data
-
-#             filename = secure_filename(photo.filename)
-#             photo.save(os.path.join(
-#                 app.config['UPLOAD_FOLDER'], filename
-#             ))
-
-#             profile = Profile(first_name=firstName, last_name=lastName, gender=gender, email=email, location=location, biography=biography, profile_picture="uploads/"+filename)
-#             db.session.add(profile)
-#             db.session.commit()
-
-#             flash('New Profile Created!', 'success')
-#             return redirect(url_for('profiles'))
-#         else:
-#             flash_errors(profilePage)
-
-#     return render_template('profile.html', form = profilePage)
-
-# @app.route('/profiles')
-# def profiles():
-#     """Render the website's profiles page."""
-#     db = connect_db()
-#     cur = db.cursor()
-#     cur.execute('SELECT * FROM userProfiles')
-#     profiles = cur.fetchall()
-#     return render_template('profiles.html', profiles=profiles)
-
-# @app.route('/profile/<userid>')
-# def loadprofile(userid):
-#     """Render the website's profiles page."""
-#     profile = Profile.query.filter_by(id=int(userid)).first()
-#     return render_template('loadprofile.html', profile=profile)
-
-# @app.route('/api/users/register', methods = ['GET', 'POST'])
-# def register():
-#     """Render the website's register page."""
-#     registerForm = RegisterForm()
-#     if request.method == 'POST':
-#         return #write code to save the data from the form in the database
-
-#     return render_template('register.html', registerForm=registerForm)
-
-
+    like = Likes(user_id=current_user.userid, post_id=post_id)
+    numberOfLikes = Likes.query.filter_by(post_id=post_id).count()
+    succesMessage = {
+        "message": "Post liked!",
+        "likes": str(numberOfLikes)
+    }
+    return jsonify(succesMessage=succesMessage)
 
 ###
 # The functions below should be applicable to all Flask apps.

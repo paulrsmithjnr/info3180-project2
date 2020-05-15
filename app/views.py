@@ -94,7 +94,7 @@ def login():
         return jsonify(loginFormErrorData=loginFormErrorData)
 
 
-@app.route('/api/auth/logout', method=['GET'])
+@app.route('/api/auth/logout', methods=['GET'])
 @login_required
 def logout():
     logout_user()
@@ -147,7 +147,7 @@ def follow(user_id):
 
 @app.route('/api/posts', methods=['GET'])
 @login_required
-def posts():
+def allposts():
     allPosts = Posts.query.order_by(Posts.id.desc()).all()
     posts = {
         "posts": allPosts

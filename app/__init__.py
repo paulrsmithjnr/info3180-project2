@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect 
 
 # Config Values
 UPLOAD_FOLDER = './app/static/uploads'
@@ -8,9 +9,10 @@ SECRET_KEY = '\x1d\xd8\xa8\xa7n\xfaZ\xe5-~\x03\xb0\x08/\x86\xf6H\xad\xc1\x82\xbe
 
 
 app = Flask(__name__)
+csrf = CSRFProtect(app)
 app.config['SECRET_KEY'] = SECRET_KEY
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://photogram:photogram@localhost/photogram"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://photogram:photogram@locahost/photogram"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True # added just to suppress a warning
 
 db = SQLAlchemy(app)

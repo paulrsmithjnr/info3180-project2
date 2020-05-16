@@ -8,8 +8,8 @@ This file creates your application.
 import os
 import jwt
 import psycopg2 
-from app import app, db
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from app import app, db, login_manager
+from flask import request, jsonify, render_template
 from flask_login import login_user, logout_user, current_user, login_required
 from app.forms import RegisterForm, LoginForm, PostForm
 from app.models import Posts, Users, Likes, Follows
@@ -55,7 +55,7 @@ def register():
         return jsonify(registrationFormErrorData=registrationFormErrorData)
 
 
-@app.route('/api/auth/login', methods=['POST'])
+@app.route('/api/auth/login', methods=['GET', 'POST'])
 def login():
     loginform = LoginForm()
     if loginform.validate_on_submit:
@@ -88,10 +88,10 @@ def login():
             return jsonify(loginError=loginError)
     
     else:
-        loginFormErrorData = {
+        loginError = {
             "errors": form_errors(loginform)
         }
-        return jsonify(loginFormErrorData=loginFormErrorData)
+        return jsonify(loginError=loginError)
 
 
 @app.route('/api/auth/logout', methods=['GET'])
@@ -170,6 +170,26 @@ def like(post_id):
 # The functions below should be applicable to all Flask apps.
 ###
 
+@login_manager.user_loader
+def load_user(id):
+    return Users.query.get(int(id))
+
+
+# Please create all new routes and view functions above this route.
+# This route is now our catch all route for our VueJS single page
+# application.
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def index(path):
+    """
+    Because we use HTML5 history mode in vue-router we need to configure our
+    web server to redirect all routes to index.html. Hence the additional route
+    "/<path:path".
+
+    Also we will render the initial webpage and then let VueJS take control.
+    """
+    return render_template('index.html')
+
 def form_errors(form):
     error_messages = []
     """Collects form errors"""
@@ -201,18 +221,18 @@ def add_header(response):
     return response
 
 
-@app.errorhandler(404)
-def page_not_found(error):
-    """Custom 404 page."""
-    return render_template('404.html'), 404
+# @app.errorhandler(404)
+# def page_not_found(error):
+#     """Custom 404 page."""
+#     return render_template('404.html'), 404
 
-def flash_errors(form):
-    for field, errors in form.errors.items():
-        for error in errors:
-            flash(u"Error in the %s field - %s" % (
-                getattr(form, field).label.text,
-                error
-), 'danger')
+# def flash_errors(form):
+#     for field, errors in form.errors.items():
+#         for error in errors:
+#             flash(u"Error in the %s field - %s" % (
+#                 getattr(form, field).label.text,
+#                 error
+# ), 'danger')
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port="8080")

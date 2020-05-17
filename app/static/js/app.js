@@ -31,6 +31,167 @@ Vue.component('app-footer', {
     `
 });
 
+
+const postForm = Vue.component('post-form', {
+  template: `
+      <div id="postFormDiv">
+          <div id = "message">
+              <p class="alert alert-success" v-if="outcome === 'success'" id = "success">Submitted Successfully!</p>
+              <ul class="alert alert-danger" v-if="outcome === 'failure'" id = "errors">
+                  <li v-for="error in errors" class="news__item"> {{ error }}</li>
+              </ul> 
+          </div>
+          <form id="uploadForm" @submit.prevent="uploadPhoto" method="POST" enctype="multipart/form-data">
+
+              <div class="form-group">
+                  <label for="description">Description</label> <textarea class="form-control" id="description" name="description"></textarea>
+              </div>
+              
+              <div class="form-group">
+                  <label for="photo">Profile Photo</label>
+                  <input class="form-control" id="photo" name="photo" type="file">
+              </div>
+
+              <button type="submit" name="submit">Upload</button>
+
+          </form>
+      </div>
+  `,
+  data: function() {
+    return {
+      outcome: '',
+      errors: []
+    }
+  },
+  methods: {
+    uploadPhoto: function() {
+
+      let uploadForm = document.getElementById('uploadForm');
+      let form_data = new FormData(uploadForm);
+      let self = this;
+      fetch("/api/users/"+ current_userid +"/posts", {
+        method: 'POST',
+        body: form_data,
+        headers: {
+          'X-CSRFToken': token
+        },
+        credentials: 'same-origin'
+      })
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (jsonResponse) {
+          // display a success message
+          console.log(jsonResponse);
+          if(jsonResponse.hasOwnProperty('errordata')) {
+            self.errors = jsonResponse.errordata.errors;
+            self.outcome = 'failure';
+          } else {
+            self.outcome = 'success';
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  }
+});
+
+
+const registerForm = Vue.component('register-form', {
+  template: `          
+  <div class="container">
+          
+      <div class="register-form center-block">
+          <h2>User Registration</h2>
+          <div id = "message">
+              <p class="alert alert-success" v-if="outcome === 'success'" id = "success"> {{ success }} </p>
+              <ul class="alert alert-danger" v-if="outcome === 'failure'" id = "errors">
+                  <li v-for="error in errors" class="news__item"> {{ error }}</li>
+              </ul> 
+          </div>
+          <form id="registerForm" @submit.prevent="registerUser" method="post" enctype="multipart/form-data">
+              <div class="form-group">
+                  <label for="username">Username</label> <input class="form-control" id="username" name="username" type="text" value="">
+              </div>
+              <div class="form-group">
+                  <label for="password">Password</label> <input class="form-control" id="password" name="password" type="text" value="">
+              </div>
+              <div class="form-group">
+                  <label for="firstName">First Name</label> <input class="form-control" id="firstName" name="firstName" type="text" value="">
+              </div>
+              <div class="form-group">
+                  <label for="lastName">Last Name</label> <input class="form-control" id="lastName" name="lastName" type="text" value="">
+              </div>
+              <div class="form-group">
+                  <label for="email">E-mail</label> <input class="form-control" id="email" name="email" type="text" value="">
+              </div>
+              <div class="form-group">
+                  <label for="location">Location</label> <input class="form-control" id="location" name="location" type="text" value="">
+              </div>
+              <div class="form-group">
+                  <label for="gender">Gender</label> <select class="form-control" id="gender" name="gender"><option value="Male">Male</option><option value="Female">Female</option></select>
+              </div>
+              <div class="form-group">
+                  <label for="biography">Biography</label> <textarea class="form-control" id="biography" name="biography"></textarea>
+              </div>
+              <div class="form-group">
+                  <label for="photo">Profile Photo</label>
+                  <input class="form-control" id="photo" name="photo" type="file">
+              </div>
+            
+              <button type="submit" name="submit">Register</button>
+          </form>
+    </div>
+
+
+  </div>
+  `,
+  data: function() {
+      return {
+        outcome: '',
+        errors: [],
+        success: ''
+      }
+  },
+  methods: {
+    registerUser: function() {
+
+      let registerForm = document.getElementById('registerForm');
+      let form_data = new FormData(registerForm);
+      // let formDataJSON = JSON.stringify(Object.fromEntries(form_data));
+      let self = this;
+      // console.log(JSON.stringify(Object.fromEntries(form_data)))
+      fetch("/api/users/register", {
+        method: 'POST',
+        body: form_data,
+        headers: {
+          'X-CSRFToken': token
+        },
+        credentials: 'same-origin'
+      })
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (jsonResponse) {
+          // display a success message
+          console.log(jsonResponse);
+          if(jsonResponse.hasOwnProperty('registerError')) {
+            self.errors = jsonResponse.registerError.errors;
+            self.outcome = 'failure';
+          } else {
+            // this.$router.push('upload')
+            self.outcome = 'success';
+            self.success = jsonResponse.successMessage.message
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  }
+});
+
 const loginForm = Vue.component('login-form', {
     template: `
     <div class="container">
@@ -43,14 +204,14 @@ const loginForm = Vue.component('login-form', {
                     <li v-for="error in errors" class="news__item"> {{ error }}</li>
                 </ul> 
             </div>
-            <form id="loginForm"  action="/login" method="post">
+            <form id="loginForm"  @submit.prevent="loginUser" method="post">
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input class="form-control" id="username" name="username" placeholder="Enter your username" required type="text" value="">
+                    <input class="form-control" id="username" name="username" placeholder="Enter your username" type="text" value="">
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input class="form-control" id="password" name="password" required type="password" value="">
+                    <input class="form-control" id="password" name="password" type="password" value="">
                 </div>
                 <button type="submit" name="submit" class="btn btn-primary btn-block">Log in</button>
             </form>
@@ -70,7 +231,9 @@ const loginForm = Vue.component('login-form', {
 
         let loginForm = document.getElementById('loginForm');
         let form_data = new FormData(loginForm);
+        // let formDataJSON = JSON.stringify(Object.fromEntries(form_data));
         let self = this;
+        // console.log(JSON.stringify(Object.fromEntries(form_data)))
         fetch("/api/auth/login", {
           method: 'POST',
           body: form_data,
@@ -89,73 +252,9 @@ const loginForm = Vue.component('login-form', {
               self.errors = jsonResponse.loginError.errors;
               self.outcome = 'failure';
             } else {
+              // this.$router.push('upload')
               self.outcome = 'success';
               self.success = jsonResponse.successMessage.message
-            }
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-      }
-    }
-  });
-
-const uploadForm = Vue.component('upload-form', {
-    template: `
-        <div id="uploadFormDiv">
-            <div id = "message">
-                <p class="alert alert-success" v-if="outcome === 'success'" id = "success">Submitted Successfully!</p>
-                <ul class="alert alert-danger" v-if="outcome === 'failure'" id = "errors">
-                    <li v-for="error in errors" class="news__item"> {{ error }}</li>
-                </ul> 
-            </div>
-            <form id="uploadForm" @submit.prevent="uploadPhoto" method="POST" enctype="multipart/form-data">
-
-                  <div class="form-group">
-                      <label for="description">Description</label> <textarea class="form-control" id="description" name="description"></textarea>
-                  </div>
-                  
-                  <div class="form-group">
-                      <label for="photo">Profile Photo</label>
-                      <input class="form-control" id="photo" name="photo" type="file">
-                  </div>
-
-                  <button type="submit" name="submit" id="uploadButton">Upload</button>
-
-            </form>
-        </div>
-    `,
-    data: function() {
-      return {
-        outcome: '',
-        errors: []
-      }
-    },
-    methods: {
-      uploadPhoto: function() {
-
-        let uploadForm = document.getElementById('uploadForm');
-        let form_data = new FormData(uploadForm);
-        let self = this;
-        fetch("/api/upload", {
-          method: 'POST',
-          body: form_data,
-          headers: {
-            'X-CSRFToken': token
-          },
-          credentials: 'same-origin'
-        })
-          .then(function (response) {
-            return response.json();
-          })
-          .then(function (jsonResponse) {
-            // display a success message
-            console.log(jsonResponse);
-            if(jsonResponse.hasOwnProperty('errordata')) {
-              self.errors = jsonResponse.errordata.errors;
-              self.outcome = 'failure';
-            } else {
-              self.outcome = 'success';
             }
           })
           .catch(function (error) {
@@ -194,8 +293,9 @@ const router = new VueRouter({
     routes: [
         {path: "/", component: Home},
         // Put other routes here
-        {path: "/upload", component: uploadForm},
+        {path: "/posts/new", component: postForm},
         {path: "/login", component: loginForm},
+        {path: "/register", component: registerForm},
         // This is a catch all route in case none of the above matches
         {path: "*", component: NotFound}
     ]

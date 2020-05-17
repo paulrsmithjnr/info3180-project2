@@ -20,18 +20,27 @@ from werkzeug.security import check_password_hash
 # Routing for your application.
 ###
 
+
 @app.route('/api/users/register', methods = ['POST'])
 def register():
     registrationForm = RegisterForm()
     if registrationForm.validate_on_submit():
-        username = registrationForm.username.data
-        password = registrationForm.password.data
-        firstName = registrationForm.firstName.data
-        lastName = registrationForm.lastName.data
-        gender = registrationForm.gender.data
-        email = registrationForm.email.data
-        location = registrationForm.location.data
-        biography = registrationForm.biography.data
+        # username = registrationForm.username.data
+        username = request.form['username']
+        # password = registrationForm.password.data
+        password = request.form['password']
+        # firstName = registrationForm.firstName.data
+        firstName = request.form['firstName']
+        # lastName = registrationForm.lastName.data
+        lastName = request.form['lastName']
+        # gender = registrationForm.gender.data
+        gender = request.form['gender']
+        # email = registrationForm.email.data
+        email = request.form['email']
+        # location = registrationForm.location.data
+        location = request.form['location']
+        # biography = registrationForm.biography.data
+        biography = request.form['biography']
         photo = registrationForm.photo.data
 
         profile_picture = secure_filename(photo.filename)
@@ -49,31 +58,37 @@ def register():
         return jsonify(successMessage=successMessage)
     
     else:
-        registrationFormErrorData = {
+        registerError = {
             "errors": form_errors(registrationForm)
         }
-        return jsonify(registrationFormErrorData=registrationFormErrorData)
+        return jsonify(registerError=registerError)
 
 
-@app.route('/api/auth/login', methods=['GET', 'POST'])
+@app.route('/api/auth/login', methods=['POST'])
 def login():
     loginform = LoginForm()
+    # print(request.form['username'])
     if loginform.validate_on_submit:
-        username=loginform.username.data
-        password=loginform.password.data
+        # username=loginform.username.data
+        # password=loginform.password.data
+        username=request.form['username']
+        password=request.form['password']
+
         user=Users.query.filter_by(username=username).first()
 
         if user is not None and check_password_hash(user.password, password):
-            remember_me=False
-            if 'remember_me' in request.form:
-                remember_me=True
+            # remember_me=False2
+            # if 'remember_me' in request.form:
+            #     remember_me=True
 
-            login_user(user, remember=remember_me)
+            # login_user(user, remember=remember_me)
+
+            login_user(user)
             payload = {
                 "username": user.username,
                 "password": user.password
             }
-            encoded_jwt = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256') 
+            encoded_jwt = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
             successMessage = {
                 "token": encoded_jwt,
                 "message": "User successfully logged in."
@@ -108,7 +123,6 @@ def logout():
 def posts(user_id):
     postForm = PostForm()
     if request.method == 'POST' and postForm.validate_on_submit():
-        
         photo = postForm.photo.data
         filename = secure_filename(photo.filename)
         photo.save(os.path.join(
@@ -117,7 +131,7 @@ def posts(user_id):
         
         description = postForm.description.data
         
-        post = Posts(user_id=user_id, photo=filename)
+        post = Posts(user_id=user_id, photo=filename, caption=description)
         db.session.add(post)
         db.session.commit()
         

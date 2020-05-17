@@ -10,12 +10,11 @@ class Posts(db.Model):
     user_id = db.Column(db.Integer)
     photo = db.Column(db.String(255))
     caption = db.Column(db.String(255))
-    created_on = db.Column(db.String(35))
+    created_on = db.Column(db.String(255))
 
     def __init__(self, user_id, photo, caption):
         self.user_id = user_id
         self.photo = photo
-        self.gender = gender
         self.caption = caption
         self.created_on = datetime.now().strftime("%B %d, %Y")
         
@@ -43,22 +42,22 @@ class Users(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80))
-    password = db.Column(db.String(80))
-    firstname = db.Column(db.String(80))
-    lastname = db.Column(db.String(80))
-    gender = db.Column(db.String(10))
-    email = db.Column(db.String(80), unique=True)
-    location = db.Column(db.String(80))
+    username = db.Column(db.String(255))
+    password = db.Column(db.String(255))
+    firstname = db.Column(db.String(255))
+    lastname = db.Column(db.String(255))
+    gender = db.Column(db.String(255))
+    email = db.Column(db.String(255), unique=True)
+    location = db.Column(db.String(255))
     biography = db.Column(db.String(255))
-    profile_picture = db.Column(db.String(80))
-    joined_on = db.Column(db.String(80))
+    profile_picture = db.Column(db.String(255))
+    joined_on = db.Column(db.String(255))
 
     def __init__(self, username, password, firstname, lastname, gender, email, location, biography, profile_picture):
         self.username = username
         self.password = generate_password_hash(password, method='pbkdf2:sha256')
-        self.first_name = first_name
-        self.last_name = last_name
+        self.firstname = firstname
+        self.lastname = lastname
         self.gender = gender
         self.email = email
         self.location = location

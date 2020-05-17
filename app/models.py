@@ -2,7 +2,6 @@ from . import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash
 
-
 class Posts(db.Model):
     __tablename__ = 'posts'
 
@@ -36,7 +35,6 @@ class Posts(db.Model):
 
     def __repr__(self):
         return '<Posts %r>' % (self.photo)
-
 
 class Users(db.Model):
     __tablename__ = 'users'

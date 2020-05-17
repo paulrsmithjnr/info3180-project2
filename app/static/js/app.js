@@ -1,4 +1,6 @@
 /* Add your Application JavaScript */
+var jwt;
+
 Vue.component('app-header', {
     template: `
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
@@ -161,7 +163,6 @@ const registerForm = Vue.component('register-form', {
       let form_data = new FormData(registerForm);
       // let formDataJSON = JSON.stringify(Object.fromEntries(form_data));
       let self = this;
-      // console.log(JSON.stringify(Object.fromEntries(form_data)))
       fetch("/api/users/register", {
         method: 'POST',
         body: form_data,
@@ -233,7 +234,6 @@ const loginForm = Vue.component('login-form', {
         let form_data = new FormData(loginForm);
         // let formDataJSON = JSON.stringify(Object.fromEntries(form_data));
         let self = this;
-        // console.log(JSON.stringify(Object.fromEntries(form_data)))
         fetch("/api/auth/login", {
           method: 'POST',
           body: form_data,
@@ -254,7 +254,8 @@ const loginForm = Vue.component('login-form', {
             } else {
               // this.$router.push('upload')
               self.outcome = 'success';
-              self.success = jsonResponse.successMessage.message
+              self.success = jsonResponse.successMessage.message;
+              jwt = jsonResponse.successMessage.token;
             }
           })
           .catch(function (error) {
@@ -263,6 +264,119 @@ const loginForm = Vue.component('login-form', {
       }
     }
   });
+
+
+const explore = Vue.component('explore', {
+    template: `          
+    <div class="container">
+        <ul>
+            <li v-for="post in posts">{{ post.caption }}</li>
+        </ul>      
+    </div>
+    `,
+    data: function() {
+        return {
+          posts: []
+        }
+    },
+    mounted: function() {
+  
+      let self = this;
+      fetch("/api/posts", {
+          method: 'GET',
+          headers: {
+            "Content-type": "application/json",
+            "Authorization" :"Bearer " + jwt
+          },
+        })
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (jsonResponse) {
+          console.log(jsonResponse);
+          self.posts = jsonResponse.posts.posts
+          
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    methods: {}
+  });
+
+const logout = Vue.component('logout', {
+    template: `          
+    <div>User successfully logged out!</div>
+    `,
+    mounted: function() {
+  
+      let self = this;
+      fetch("/api/auth/logout", {
+          method: 'GET',
+          headers: {
+            "Content-type": "application/json"
+          },
+        })
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (jsonResponse) {
+          console.log(jsonResponse);          
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    methods: {}
+  });
+
+
+const userProfile = Vue.component('userProfile', {
+    template: `          
+    <div class="container">
+        <p>{{ info.username }}</p>
+        <ul>
+            <li v-for="post in posts">{{ post.caption }}</li>
+        </ul>      
+    </div>
+    `,
+    data: function() {
+        return {
+          posts: [],
+          info: {}
+        }
+    },
+    mounted: function() {
+  
+      let self = this;
+      let user_id = this.$route.params.user_id;
+      // console.log(user_id);
+
+      //fetches the user's posts
+      fetch("/api/users/"+user_id+"/posts", {
+          method: 'GET',
+          headers: {
+            "Content-type": "application/json",
+            "Authorization" :"Bearer " + jwt
+          },
+        })
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (jsonResponse) {
+          console.log(jsonResponse);
+          self.posts = jsonResponse.details.posts;
+          self.info = jsonResponse.details.info;
+          
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    methods: {}
+});
+  
+
 
 const Home = Vue.component('home', {
    template: `
@@ -296,6 +410,9 @@ const router = new VueRouter({
         {path: "/posts/new", component: postForm},
         {path: "/login", component: loginForm},
         {path: "/register", component: registerForm},
+        {path: "/explore", component: explore},
+        {path: "/users/:user_id", component: userProfile},
+        {path: "/logout", component: logout},
         // This is a catch all route in case none of the above matches
         {path: "*", component: NotFound}
     ]

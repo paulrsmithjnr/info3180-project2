@@ -141,12 +141,41 @@ def posts(user_id):
         return jsonify(successMessage=successMessage)
     
     elif request.method == 'GET':
-
+        
+        user = Users.query.filter_by(id=user_id).first()
         userPosts = Posts.query.filter_by(user_id=user_id).all()
-        posts = {
-            "posts": userPosts
-        }           
-        return jsonify(userPosts=userPosts)
+
+        userInfo = {
+            "id": user.id,
+            "username": user.username,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "gender": user.gender,
+            "email": user.email,
+            "location": user.location,
+            "biography": user.biography,
+            "photo": user.profile_picture,
+            "joined_on": user.joined_on
+        }
+
+        postsList = []
+        for post in userPosts:
+            likeCount = Likes.query.filter_by(post_id=post.id).count()
+            currentPost = {
+                "id": post.id,
+                "user_id": post.user_id,
+                "photo": post.photo,
+                "caption": post.caption,
+                "created_on": post.created_on,
+                "likes": likeCount
+            }
+            postsList.append(currentPost)
+
+            details = {
+                "posts": postsList,
+                "info": userInfo
+            }           
+        return jsonify(details=details)
 
 
 @app.route('/api/users/<user_id>/follow', methods=['POST'])
@@ -163,8 +192,20 @@ def follow(user_id):
 @login_required
 def allposts():
     allPosts = Posts.query.order_by(Posts.id.desc()).all()
+    postsList = []
+    for post in allPosts:
+        likeCount = Likes.query.filter_by(post_id=post.id).count()
+        currentPost = {
+            "id": post.id,
+            "user_id": post.user_id,
+            "photo": post.photo,
+            "caption": post.caption,
+            "created_on": post.created_on,
+            "likes": likeCount
+        }
+        postsList.append(currentPost)
     posts = {
-        "posts": allPosts
+        "posts": postsList
     }
     return jsonify(posts=posts)
 

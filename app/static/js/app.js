@@ -1,5 +1,7 @@
 /* Add your Application JavaScript */
 var jwt;
+let successMessage;
+let displaySuccessMessage = false;
 
 Vue.component('app-header', {
     template: `
@@ -15,12 +17,23 @@ Vue.component('app-header', {
             <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
           </li>
           <li class="nav-item active">
-            <router-link class="nav-link" to="/upload">Upload Form <span class="sr-only">(current)</span></router-link>
+            <router-link class="nav-link" to="/explore">Explore<span class="sr-only">(current)</span></router-link>
+          </li>
+          <li class="nav-item active">
+            <router-link class="nav-link" to="/myprofile">My Profile<span class="sr-only">(current)</span></router-link>
+          </li>
+          <li class="nav-item active">
+            <router-link class="nav-link" to="/logout">Logout<span class="sr-only">(current)</span></router-link>
           </li>
         </ul>
       </div>
     </nav>
-    `
+    `,
+    data: function() {
+      return {
+        user_id: current_userid 
+      }
+    }
 });
 
 Vue.component('app-footer', {
@@ -200,7 +213,6 @@ const loginForm = Vue.component('login-form', {
         <div class="login-form center-block">
             <h2>Please Log in</h2>
             <div id = "message">
-                <p class="alert alert-success" v-if="outcome === 'success'" id = "success"> {{ success }} </p>
                 <ul class="alert alert-danger" v-if="outcome === 'failure'" id = "errors">
                     <li v-for="error in errors" class="news__item"> {{ error }}</li>
                 </ul> 
@@ -223,13 +235,12 @@ const loginForm = Vue.component('login-form', {
     data: function() {
         return {
           outcome: '',
-          errors: [],
-          success: ''
+          errors: []
         }
     },
     methods: {
       loginUser: function() {
-
+        let router = this.$router;
         let loginForm = document.getElementById('loginForm');
         let form_data = new FormData(loginForm);
         // let formDataJSON = JSON.stringify(Object.fromEntries(form_data));
@@ -252,10 +263,11 @@ const loginForm = Vue.component('login-form', {
               self.errors = jsonResponse.loginError.errors;
               self.outcome = 'failure';
             } else {
-              // this.$router.push('upload')
-              self.outcome = 'success';
-              self.success = jsonResponse.successMessage.message;
+              successMessage = jsonResponse.successMessage.message;
+              displaySuccessMessage = true;
               jwt = jsonResponse.successMessage.token;
+              console.log(router); 
+              router.push('explore')
             }
           })
           .catch(function (error) {
@@ -269,6 +281,9 @@ const loginForm = Vue.component('login-form', {
 const explore = Vue.component('explore', {
     template: `          
     <div class="container">
+        <div id = "message">
+            <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
+        </div>
         <ul>
             <li v-for="post in posts">{{ post.caption }}</li>
         </ul>      
@@ -276,7 +291,9 @@ const explore = Vue.component('explore', {
     `,
     data: function() {
         return {
-          posts: []
+          posts: [],
+          message: '',
+          success: false
         }
     },
     mounted: function() {
@@ -295,6 +312,11 @@ const explore = Vue.component('explore', {
         .then(function (jsonResponse) {
           console.log(jsonResponse);
           self.posts = jsonResponse.posts.posts
+          if(displaySuccessMessage) {
+            displaySuccessMessage = false;
+            self.success = true;
+            self.message = successMessage;
+          }
           
         })
         .catch(function (error) {
@@ -375,14 +397,58 @@ const userProfile = Vue.component('userProfile', {
     },
     methods: {}
 });
+
+
+const myProfile = Vue.component('myProfile', {
+  template: `          
+  <div class="container">
+      <p>{{ info.username }}</p>
+      <ul>
+          <li v-for="post in posts">{{ post.caption }}</li>
+      </ul>      
+  </div>
+  `,
+  data: function() {
+      return {
+        posts: [],
+        info: {}
+      }
+  },
+  mounted: function() {
+
+    let self = this;
+
+    //fetches the user's posts
+    fetch("/api/users/"+current_userid+"/posts", {
+        method: 'GET',
+        headers: {
+          "Content-type": "application/json",
+          "Authorization" :"Bearer " + jwt
+        },
+      })
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (jsonResponse) {
+        console.log(jsonResponse);  
+        self.posts = jsonResponse.details.posts;
+        self.info = jsonResponse.details.info;
+        
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  },
+  methods: {}
+});
   
 
 
 const Home = Vue.component('home', {
    template: `
     <div class="jumbotron">
-        <h1>Lab 7</h1>
-        <p class="lead">In this lab we will demonstrate VueJS working with Forms and Form Validation from Flask-WTF.</p>
+        <h1>Photogram</h1>
+        <p class="lead">Remember to change this to something photogram related as well as to add a login and register button</p>
     </div>
    `,
     data: function() {
@@ -406,13 +472,16 @@ const router = new VueRouter({
     mode: 'history',
     routes: [
         {path: "/", component: Home},
+
         // Put other routes here
         {path: "/posts/new", component: postForm},
         {path: "/login", component: loginForm},
         {path: "/register", component: registerForm},
         {path: "/explore", component: explore},
         {path: "/users/:user_id", component: userProfile},
+        {path: "/myprofile", component: myProfile},
         {path: "/logout", component: logout},
+        
         // This is a catch all route in case none of the above matches
         {path: "*", component: NotFound}
     ]

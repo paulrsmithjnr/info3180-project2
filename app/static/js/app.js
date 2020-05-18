@@ -519,7 +519,7 @@ const userProfile = Vue.component('userProfile', {
               </div>
               <div id="profileDetailsDiv">
                   <h4><b>{{ info.firstname }} {{ info.lastname }}</b></h4>
-                  <p class="text-muted">{{ info.location }}<br>Member since {{ info.joined_on }}</p> 
+                  <p class="text-muted"><img class="profileIcon" src="../static/images/location.png" alt="location"/> {{ info.location }}<br><img class="profileIcon" src="../static/images/date.png" alt="date"/> Member since {{ info.joined_on }}<br><img class="profileIcon" src="../static/images/email.png" alt="email"/> {{ info.email }}<br><img class="profileIcon" src="../static/images/gender.png" alt="gender"/> {{ info.gender }}</p> 
                   <p class="text-muted"><i>{{ info.biography }}</i></p>
               </div>
               <div id="profileButtonDiv">
@@ -695,7 +695,7 @@ const myProfile = Vue.component('myProfile', {
               </div>
               <div id="profileDetailsDiv">
                   <h4><b>{{ info.firstname }} {{ info.lastname }}</b></h4>
-                  <p class="text-muted">{{ info.location }}<br>Member since {{ info.joined_on }}</p> 
+                  <p class="text-muted"><img class="profileIcon" src="../static/images/location.png" alt="location"/> {{ info.location }}<br><img class="profileIcon" src="../static/images/date.png" alt="date"/> Member since {{ info.joined_on }}<br><img class="profileIcon" src="../static/images/email.png" alt="email"/> {{ info.email }}<br><img class="profileIcon" src="../static/images/gender.png" alt="gender"/> {{ info.gender }}</p> 
                   <p class="text-muted"><i>{{ info.biography }}</i></p>
               </div>
               <div id="profileButtonDiv">

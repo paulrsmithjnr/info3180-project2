@@ -193,3 +193,8 @@ body {
     grid-column-gap: 2%;
     height: fit-content;
 }
+
+.profileIcon {
+    width: 15px;
+    height: 15px;
+}

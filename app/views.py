@@ -123,23 +123,29 @@ def logout():
 @login_required
 def posts(user_id):
     postForm = PostForm()
-    if request.method == 'POST' and postForm.validate_on_submit():
-        photo = postForm.photo.data
-        filename = secure_filename(photo.filename)
-        photo.save(os.path.join(
-            app.config['UPLOAD_FOLDER'], filename
-        ))
-        
-        description = postForm.description.data
-        
-        post = Posts(user_id=user_id, photo=filename, caption=description)
-        db.session.add(post)
-        db.session.commit()
-        
-        successMessage = {
-            "message": "Successfully created a new post"
-        }
-        return jsonify(successMessage=successMessage)
+    if request.method == 'POST':
+        if postForm.validate_on_submit():
+            photo = postForm.photo.data
+            filename = secure_filename(photo.filename)
+            photo.save(os.path.join(
+                app.config['UPLOAD_FOLDER'], filename
+            ))
+            
+            description = postForm.description.data
+            
+            post = Posts(user_id=user_id, photo=filename, caption=description)
+            db.session.add(post)
+            db.session.commit()
+            
+            successMessage = {
+                "message": "Successfully created a new post"
+            }
+            return jsonify(successMessage=successMessage)
+        else:
+            errordata = {
+            "errors": form_errors(postForm)
+            }
+            return jsonify(errordata=errordata)
     
     elif request.method == 'GET':
         

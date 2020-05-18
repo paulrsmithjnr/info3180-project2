@@ -15,26 +15,8 @@ class Posts(db.Model):
         self.user_id = user_id
         self.photo = "../static/uploads/" + photo
         self.caption = caption
-        self.created_on = datetime.now().strftime("%B %d, %Y")
+        self.created_on = datetime.now().strftime("%B %d, %Y | %I:%M %p")
         
-
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        try:
-            return unicode(self.id)  # python 2 support
-        except NameError:
-            return str(self.id)  # python 3 support
-
-    def __repr__(self):
-        return '<Posts %r>' % (self.photo)
 
 class Users(db.Model):
     __tablename__ = 'users'
@@ -82,6 +64,7 @@ class Users(db.Model):
     def __repr__(self):
         return '<Users %r>' % (self.username)
 
+
 class Likes(db.Model):
     __tablename__ = 'likes'
 
@@ -92,24 +75,6 @@ class Likes(db.Model):
     def __init__(self, user_id, post_id):
         self.user_id = user_id
         self.post_id = post_id        
-
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        try:
-            return unicode(self.id)  # python 2 support
-        except NameError:
-            return str(self.id)  # python 3 support
-
-    def __repr__(self):
-        return '<Likes %r>' % (self.user_id)
 
 
 class Follows(db.Model):
@@ -122,21 +87,3 @@ class Follows(db.Model):
     def __init__(self, user_id, follower_id):
         self.user_id = user_id
         self.follower_id = follower_id        
-
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        try:
-            return unicode(self.id)  # python 2 support
-        except NameError:
-            return str(self.id)  # python 3 support
-
-    def __repr__(self):
-        return '<Follows %r>' % (self.user_id)

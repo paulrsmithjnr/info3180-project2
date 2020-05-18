@@ -91,7 +91,8 @@ def login():
             encoded_jwt = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
             successMessage = {
                 "token": encoded_jwt,
-                "message": "User successfully logged in."
+                "message": "User successfully logged in.",
+                "user_id": user.id
             }
 
             return jsonify(successMessage=successMessage)
@@ -163,7 +164,8 @@ def posts(user_id):
             "joined_on": user.joined_on,
             "followers": followersCount,
             "posts": postsCount,
-            "followed": followFlag
+            "followed": followFlag,
+            "currentUserId": current_user.id
         }
 
         postsList = []

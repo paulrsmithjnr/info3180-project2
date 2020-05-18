@@ -295,6 +295,7 @@ const loginForm = Vue.component('login-form', {
             } else {
 
               successMessage = jsonResponse.successMessage.message;
+              current_userid = jsonResponse.successMessage.user_id;
               displaySuccessMessage = true;
               jwt = jsonResponse.successMessage.token;
               router.push('explore')

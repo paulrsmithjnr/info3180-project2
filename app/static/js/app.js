@@ -477,7 +477,7 @@ const userProfile = Vue.component('userProfile', {
                           <p>{{ info.followers }}<br><b>Followers</b></p>
                       </div>
                   </div>
-                  <div id="followBtnDiv">
+                  <div v-if="!isCurrentUser" id="followBtnDiv">
                       <button v-if="info.followed" id="followBtn" class="btn btn-primary" @click="addFollow(info.id)" type="submit">Following</button>
                       <button v-if="!info.followed" id="followBtn" class="btn btn-primary" @click="addFollow(info.id)" type="submit">Follow</button>
                   </div>
@@ -501,7 +501,8 @@ const userProfile = Vue.component('userProfile', {
         return {
           posts: [],
           info: {},
-          response: null
+          response: null,
+          isCurrentUser: false
         }
     },
     mounted: function() {
@@ -523,6 +524,9 @@ const userProfile = Vue.component('userProfile', {
           console.log(jsonResponse);
           self.posts = jsonResponse.details.posts;
           self.info = jsonResponse.details.info;
+          if(current_userid==user_id) {
+            self.isCurrentUser = true;
+          }
           
         })
         .catch(function (error) {
@@ -564,6 +568,9 @@ const userProfile = Vue.component('userProfile', {
             console.log(jsonResponse);
             self.posts = jsonResponse.details.posts;
             self.info = jsonResponse.details.info;
+            if(current_userid==user_id) {
+              self.isCurrentUser = true;
+            }
 
           })
           .catch(function (error) {
@@ -591,10 +598,10 @@ const myProfile = Vue.component('myProfile', {
               <div id="profileButtonDiv">
                   <div id="numbers">
                       <div id="postsNum">
-                          <p>6<br><b>Posts</b></p>
+                          <p>{{ info.posts }}<br><b>Posts</b></p>
                       </div>
                       <div id="followersNum">
-                          <p>10<br><b>Followers</b></p>
+                          <p>{{ info.followers }}<br><b>Followers</b></p>
                       </div>
                   </div>
               </div>

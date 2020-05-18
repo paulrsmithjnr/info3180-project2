@@ -6,7 +6,7 @@ let displaySuccessMessage = false;
 Vue.component('app-header', {
     template: `
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <a class="navbar-brand" href="#"><b>Photogram</b></a>
+      <a class="navbar-brand" href="/explore"><b>Photogram</b></a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -28,19 +28,15 @@ Vue.component('app-header', {
         </ul>
       </div>
     </nav>
-    `,
-    data: function() {
-      return {
-        user_id: current_userid 
-      }
-    }
+    `
 });
 
 Vue.component('app-footer', {
     template: `
     <footer>
+        <br><br>
         <div class="container">
-            <p>Copyright &copy; Flask Inc.</p>
+            <p>Copyright &copy; Photogram Inc.</p>
         </div>
     </footer>
     `
@@ -51,7 +47,6 @@ const postForm = Vue.component('post-form', {
   template: `
       <div id="postFormDiv">
           <div id = "message">
-              <p class="alert alert-success" v-if="outcome === 'success'" id = "success">Submitted Successfully!</p>
               <ul class="alert alert-danger" v-if="outcome === 'failure'" id = "errors">
                   <li v-for="error in errors" class="news__item"> {{ error }}</li>
               </ul> 
@@ -102,7 +97,10 @@ const postForm = Vue.component('post-form', {
             self.errors = jsonResponse.errordata.errors;
             self.outcome = 'failure';
           } else {
-            self.outcome = 'success';
+            successMessage = jsonResponse.successMessage.message;
+            displaySuccessMessage = true;
+            router.go(-1)
+            router.push('explore');
           }
         })
         .catch(function (error) {
@@ -120,7 +118,7 @@ const registerForm = Vue.component('register-form', {
       <div class="register-form center-block">
           <h2>User Registration</h2>
           <div id = "message">
-              <p class="alert alert-success" v-if="outcome === 'success'" id = "success"> {{ success }} </p>
+              <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
               <ul class="alert alert-danger" v-if="outcome === 'failure'" id = "errors">
                   <li v-for="error in errors" class="news__item"> {{ error }}</li>
               </ul> 
@@ -166,12 +164,13 @@ const registerForm = Vue.component('register-form', {
       return {
         outcome: '',
         errors: [],
-        success: ''
+        message: '',
+        success: false
       }
   },
   methods: {
     registerUser: function() {
-
+      let router = this.$router;
       let registerForm = document.getElementById('registerForm');
       let form_data = new FormData(registerForm);
       // let formDataJSON = JSON.stringify(Object.fromEntries(form_data));
@@ -194,9 +193,9 @@ const registerForm = Vue.component('register-form', {
             self.errors = jsonResponse.registerError.errors;
             self.outcome = 'failure';
           } else {
-            // this.$router.push('upload')
-            self.outcome = 'success';
-            self.success = jsonResponse.successMessage.message
+            successMessage = jsonResponse.successMessage.message;
+            displaySuccessMessage = true;
+            router.push('login')
           }
         })
         .catch(function (error) {
@@ -213,7 +212,9 @@ const loginForm = Vue.component('login-form', {
         <div class="login-form center-block">
             <h2>Please Log in</h2>
             <div id = "message">
-                <ul class="alert alert-danger" v-if="outcome === 'failure'" id = "errors">
+            <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
+            <p class="alert alert-danger" v-if="outcome === 'singleError'" id = "error"> {{ errorMessage }} </p>
+                <ul class="alert alert-danger" v-if="outcome === 'multipleErrors'" id = "errors">
                     <li v-for="error in errors" class="news__item"> {{ error }}</li>
                 </ul> 
             </div>
@@ -235,8 +236,21 @@ const loginForm = Vue.component('login-form', {
     data: function() {
         return {
           outcome: '',
-          errors: []
+          errors: [],
+          errorMessage: '',
+          message: '',
+          success: false
         }
+    },
+    mounted: function() {
+  
+      let self = this;
+      if(displaySuccessMessage) {
+        displaySuccessMessage = false;
+        self.success = true;
+        self.message = successMessage;
+      }
+          
     },
     methods: {
       loginUser: function() {
@@ -259,15 +273,26 @@ const loginForm = Vue.component('login-form', {
           .then(function (jsonResponse) {
             // display a success message
             console.log(jsonResponse);
+
             if(jsonResponse.hasOwnProperty('loginError')) {
-              self.errors = jsonResponse.loginError.errors;
-              self.outcome = 'failure';
+
+              self.errorMessage = jsonResponse.loginError.error;
+              self.outcome = 'singleError';
+              displaySuccessMessage = false
+
+            } else if(jsonResponse.hasOwnProperty('loginErrors')) {
+
+              self.errors = jsonResponse.loginErrors.errors;
+              self.outcome = 'multipleErrors'
+              displaySuccessMessage = false
+
             } else {
+
               successMessage = jsonResponse.successMessage.message;
               displaySuccessMessage = true;
               jwt = jsonResponse.successMessage.token;
-              console.log(router); 
               router.push('explore')
+
             }
           })
           .catch(function (error) {
@@ -278,30 +303,54 @@ const loginForm = Vue.component('login-form', {
   });
 
 
-const explore = Vue.component('explore', {
-    template: `          
-    <div class="container">
+/*
+
         <div id = "message">
             <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
         </div>
-        
         <div v-for="post in posts" class="card" style="width: 18rem;">
-            <h5 class="card-title">{{ post.username }}</h5>
+            <h5 class="card-title"><b>{{ post.username }}</b></h5>
             <img v-bind:src="post.photo" class="card-img-top" alt="photo"/>
             <div class="card-body">
                 <p class="card-text">{{ post.caption }}</p> 
                 <p class="card-text">{{ post.created_on }}</p>
                 <a href="#" class="btn btn-primary">Go somewhere</a>
             </div>
-        </div>
+        </div>          
+          
+*/
 
+
+const explore = Vue.component('explore', {
+    template: `          
+    <div class="allPostsContainer">
+        <div id="allPostsGrid">
+            <div id="allPosts">
+                <div v-for="post in posts" class="explorePost">
+                    <button @click="$router.push({ name: 'user', params: { user_id: post.user_id } })" id="blackText" type="button" class="btn btn-link explorePostHead"><h5 ><img v-bind:src="post.profile_picture" class="explorePostProfilePhoto" alt="photo"/><b>{{ post.username }}</b></h5></button>
+                    <img v-bind:src="post.photo" class="explorePostPhoto" alt="photo"/>
+                    <div class="explorePostBody">
+                        <p class="explorePostText text-muted">{{ post.caption }}</p> 
+                        <div id="likesdate">
+                            <button v-if="!post.liked" @click="sendLike(post.id)" id="blackText" class="btn btn-light" type="submit"><img id="likesicon" src="../static/images/heart.png" /> {{ post.likes }} Likes</button>
+                            <button v-if="post.liked" @click="sendLike(post.id)" id="blackText" class="btn btn-danger" type="submit"><img id="likesicon" src="../static/images/heart.png" /> {{ post.likes }} Likes</button>
+                            <p class="explorePostText text-muted"><b><i>{{ post.created_on }}</i></b></p>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+            <div id="newPostBtnDiv">
+                <button id="newPostBtn" class="btn btn-primary" @click="$router.push('/posts/new')" type="submit">New Post</button>
+            </div>
+        </div>
     </div>
     `,
     data: function() {
         return {
           posts: [],
           message: '',
-          success: false
+          success: false,
+          response: null
         }
     },
     mounted: function() {
@@ -319,7 +368,8 @@ const explore = Vue.component('explore', {
         })
         .then(function (jsonResponse) {
           console.log(jsonResponse);
-          self.posts = jsonResponse.posts.posts
+          self.posts = jsonResponse.posts.posts;
+          self.likes = jsonResponse.posts.likes;
           if(displaySuccessMessage) {
             displaySuccessMessage = false;
             self.success = true;
@@ -331,12 +381,53 @@ const explore = Vue.component('explore', {
           console.log(error);
         });
     },
-    methods: {}
+    methods: {
+      sendLike: function(post_id) {
+        let like = {
+          "user_id": current_userid,
+          "post_id": post_id
+        }
+        let self = this;
+        fetch("/api/posts/"+post_id+"/like", {
+          method: 'POST',
+          body: like,
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization" :"Bearer " + jwt,
+            'X-CSRFToken': token
+          },
+          credentials: 'same-origin'
+        })
+          .then(function (response) {
+            self.response = response.json()
+            return fetch("/api/posts", {
+              method: 'GET',
+              headers: {
+                "Content-type": "application/json",
+                "Authorization" :"Bearer " + jwt
+              },
+            })
+            .then(function (response) {
+              return response.json();
+            });
+          })
+          .then(function (jsonResponse) {
+            // display a success message
+            console.log(jsonResponse);
+            self.posts = jsonResponse.posts.posts;
+            self.likes = jsonResponse.posts.likes;
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+      }
+    }
   });
 
 const logout = Vue.component('logout', {
-    template: `          
-    <div>User successfully logged out!</div>
+    template: `
     `,
     mounted: function() {
   
@@ -351,7 +442,10 @@ const logout = Vue.component('logout', {
           return response.json();
         })
         .then(function (jsonResponse) {
-          console.log(jsonResponse);          
+          console.log(jsonResponse);
+          successMessage = jsonResponse.successMessage.message;
+          displaySuccessMessage = true;
+          router.push('login')          
         })
         .catch(function (error) {
           console.log(error);
@@ -363,12 +457,44 @@ const logout = Vue.component('logout', {
 
 const userProfile = Vue.component('userProfile', {
     template: `          
-    <div class="container">
-        <p>{{ info.username }}</p>
-        <ul>
-            <li v-for="post in posts">{{ post.caption }}</li>
-        </ul>      
-    </div>
+    <div id="profileMainContainer" class="container">
+      <div  class="profileSubContainer">
+          <div id="profile">
+              <div id="profilePictureDiv">
+                  <img id="profilePicture" v-bind:src="info.photo" alt="profile picture"/>
+              </div>
+              <div id="profileDetailsDiv">
+                  <h4><b>{{ info.firstname }} {{ info.lastname }}</b></h4>
+                  <p class="text-muted">{{ info.location }}<br>Member since {{ info.joined_on }}</p> 
+                  <p class="text-muted"><i>{{ info.biography }}</i></p>
+              </div>
+              <div id="profileButtonDiv">
+                  <div id="numbers">
+                      <div id="postsNum">
+                          <p>6<br><b>Posts</b></p>
+                      </div>
+                      <div id="followersNum">
+                          <p>10<br><b>Followers</b></p>
+                      </div>
+                  </div>
+                  <div id="followBtnDiv">
+                      <button id="followBtn" class="btn btn-primary" @click="" type="submit">Follow</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <br><br>
+      <div class="profileSubContainer">
+          <div id="userPostsDiv">
+              <ul id="postsList">
+                  <li v-for="post in posts" id="postItem">
+                      <img class="posts" v-bind:src="post.photo" alt="picture"/>
+                  </li>
+              </ul>
+          </div>
+      </div>
+            
+  </div>
     `,
     data: function() {
         return {
@@ -380,9 +506,7 @@ const userProfile = Vue.component('userProfile', {
   
       let self = this;
       let user_id = this.$route.params.user_id;
-      // console.log(user_id);
 
-      //fetches the user's posts
       fetch("/api/users/"+user_id+"/posts", {
           method: 'GET',
           headers: {
@@ -409,11 +533,40 @@ const userProfile = Vue.component('userProfile', {
 
 const myProfile = Vue.component('myProfile', {
   template: `          
-  <div class="container">
-      <p>{{ info.username }}</p>
-      <ul>
-          <li v-for="post in posts">{{ post.caption }}</li>
-      </ul>      
+  <div id="profileMainContainer" class="container">
+      <div  class="profileSubContainer">
+          <div id="profile">
+              <div id="profilePictureDiv">
+                  <img id="profilePicture" v-bind:src="info.photo" alt="profile picture"/>
+              </div>
+              <div id="profileDetailsDiv">
+                  <h4><b>{{ info.firstname }} {{ info.lastname }}</b></h4>
+                  <p class="text-muted">{{ info.location }}<br>Member since {{ info.joined_on }}</p> 
+                  <p class="text-muted"><i>{{ info.biography }}</i></p>
+              </div>
+              <div id="profileButtonDiv">
+                  <div id="numbers">
+                      <div id="postsNum">
+                          <p>6<br><b>Posts</b></p>
+                      </div>
+                      <div id="followersNum">
+                          <p>10<br><b>Followers</b></p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <br><br>
+      <div class="profileSubContainer">
+          <div id="userPostsDiv">
+              <ul id="postsList">
+                  <li v-for="post in posts" id="postItem">
+                      <img class="posts" v-bind:src="post.photo" alt="picture"/>
+                  </li>
+              </ul>
+          </div>
+      </div>
+            
   </div>
   `,
   data: function() {
@@ -488,7 +641,7 @@ const router = new VueRouter({
         {path: "/login", component: loginForm},
         {path: "/register", component: registerForm},
         {path: "/explore", component: explore},
-        {path: "/users/:user_id", component: userProfile},
+        {path: "/users/:user_id", name: 'user' ,component: userProfile},
         {path: "/myprofile", component: myProfile},
         {path: "/logout", component: logout},
         

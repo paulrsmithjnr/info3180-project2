@@ -98,12 +98,12 @@ def login():
 
         else:
             loginError = {
-            "errors": "Username or Password is incorrect."
+            "error": "Username or Password is incorrect."
             }
             return jsonify(loginError=loginError)
     
     else:
-        loginError = {
+        loginErrors = {
             "errors": form_errors(loginform)
         }
         return jsonify(loginError=loginError)
@@ -144,7 +144,12 @@ def posts(user_id):
         
         user = Users.query.filter_by(id=user_id).first()
         userPosts = Posts.query.filter_by(user_id=user_id).all()
-
+        followersCount = Follows.query.filter_by(user_id=user_id).count()
+        postsCount = Posts.query.filter_by(user_id=user_id).count()
+        findFollow = Follows.query.filter_by(user_id=current_user.id, follower_id=user_id).first()
+        followFlag = False
+        if findFollow is not None:
+            followFlag = True
         userInfo = {
             "id": user.id,
             "username": user.username,
@@ -155,7 +160,10 @@ def posts(user_id):
             "location": user.location,
             "biography": user.biography,
             "photo": user.profile_picture,
-            "joined_on": user.joined_on
+            "joined_on": user.joined_on,
+            "followers": followersCount,
+            "posts": postsCount,
+            "followed": followFlag
         }
 
         postsList = []
@@ -181,11 +189,22 @@ def posts(user_id):
 @app.route('/api/users/<user_id>/follow', methods=['POST'])
 @login_required
 def follow(user_id):
-    follow = Follows(user_id=current_user.user_id, follower_id=user_id)
-    succesMessage = {
-        "message": "You are now following that user"
-    }
-    return jsonify(succesMessage=succesMessage)
+    findFollow = Follows.query.filter_by(user_id=current_user.id, follower_id=user_id).first()
+    if findFollow is None:
+        follow = Follows(user_id=current_user.user_id, follower_id=user_id)
+        db.session.add(follow)
+        db.session.commit()
+        succesMessage = {
+            "message": "You are now following this user"
+        }
+        return jsonify(succesMessage=succesMessage)
+    else:
+        Follows.query.filter_by(user_id=current_user.id, follower_id=user_id).delete()
+        db.session.commit()
+        succesMessage = {
+            "message": "You are no longer following this user"
+        }
+        return jsonify(succesMessage=succesMessage)
 
 
 @app.route('/api/posts', methods=['GET'])
@@ -194,8 +213,12 @@ def allposts():
     allPosts = Posts.query.order_by(Posts.id.desc()).all()
     postsList = []
     for post in allPosts:
+        likeFlag = False
         likeCount = Likes.query.filter_by(post_id=post.id).count()
         user = Users.query.filter_by(id=post.user_id).first()
+        findLike = Likes.query.filter_by(user_id=current_user.id, post_id=post.id).first()
+        if findLike is not None:
+            likeFlag = True
         currentPost = {
             "id": post.id,
             "user_id": post.user_id,
@@ -204,7 +227,8 @@ def allposts():
             "created_on": post.created_on,
             "likes": likeCount,
             "username": user.username,
-            "profile_picture": user.profile_picture
+            "profile_picture": user.profile_picture,
+            "liked": likeFlag
         }
         postsList.append(currentPost)
     posts = {
@@ -213,16 +237,29 @@ def allposts():
     return jsonify(posts=posts)
 
 
-@app.route('/api/posts/<post_id>/like',methods=['POST'])
+@app.route('/api/posts/<post_id>/like', methods=['POST'])
 @login_required
 def like(post_id):
-    like = Likes(user_id=current_user.userid, post_id=post_id)
-    numberOfLikes = Likes.query.filter_by(post_id=post_id).count()
-    succesMessage = {
-        "message": "Post liked!",
-        "likes": str(numberOfLikes)
-    }
-    return jsonify(succesMessage=succesMessage)
+    findLike = Likes.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+    if findLike is None:
+        like = Likes(user_id=current_user.id, post_id=post_id)
+        db.session.add(like)
+        db.session.commit()
+        numberOfLikes = Likes.query.filter_by(post_id=post_id).count()
+        succesMessage = {
+            "message": "Post liked!",
+            "likes": numberOfLikes
+        }
+        return jsonify(succesMessage=succesMessage)
+    else:
+        Likes.query.filter_by(user_id=current_user.id, post_id=post_id).delete()
+        db.session.commit()
+        numberOfLikes = Likes.query.filter_by(post_id=post_id).count()
+        succesMessage = {
+            "message": "Post unliked!",
+            "likes": numberOfLikes
+        }
+        return jsonify(succesMessage=succesMessage)
 
 ###
 # The functions below should be applicable to all Flask apps.

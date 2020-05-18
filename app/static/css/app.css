@@ -3,3 +3,118 @@ body {
     background-color: rgb(226, 243, 243);
 }
 
+#profile {
+    border-top: blue solid 5px;
+    display: grid;
+    grid-template-columns: 200px 310px 250px;
+    grid-gap: 20px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    padding: 2%;
+    background-color: white;
+    border-radius: 10px;
+    width: 900px;
+}
+
+#profilePictureDiv {
+    width: fit-content;
+}
+
+#profilePicture {
+    width: 100%;
+    height: auto;
+}
+
+#profileButtonDiv {
+    display: grid;
+    grid-template-rows: 50px 50px;
+    grid-gap: 50px;
+}
+
+#numbers {
+    display: grid;
+    grid-template-columns: 80px 80px;
+    grid-gap: 75px;
+
+    text-align: center;
+}
+
+#followBtn {
+    width: 100%;
+}
+
+.profileSubContainer {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#profileMainContainer {
+    width: 100%;
+}
+
+#postsList {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    list-style-type: none;
+    grid-row-gap: 25px;
+}
+
+.posts {
+    width: 320px;
+    height: 320px;
+}
+
+#userPostsDiv {
+    width: 100%;
+}
+
+#allPostsGrid{
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+.explorePost{
+    width: 600px;
+    display: grid;
+    grid-template-rows: auto auto auto;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    background-color: white;
+    margin-bottom: 50px;
+}
+
+.explorePostPhoto {
+    width: 100%;
+    height: auto;
+}
+
+.explorePostHead, .explorePostBody{
+    margin: 20px;
+}
+
+.explorePostProfilePhoto {
+    height: 70px;
+    width: 70px;
+    border-radius: 100%;
+}
+
+#newPostBtn{
+    width: 100%;
+}
+
+#likesdate{
+    display: grid;
+    grid-template-columns: 25% 75%;
+    text-align: right;
+}
+
+#likesicon{
+    height: 35px;
+    width: 35px;
+}
+
+#blackText{
+    color: black;
+    font-weight: bold;
+    width: fit-content;
+}

@@ -471,14 +471,15 @@ const userProfile = Vue.component('userProfile', {
               <div id="profileButtonDiv">
                   <div id="numbers">
                       <div id="postsNum">
-                          <p>6<br><b>Posts</b></p>
+                          <p>{{ info.posts }}<br><b>Posts</b></p>
                       </div>
                       <div id="followersNum">
-                          <p>10<br><b>Followers</b></p>
+                          <p>{{ info.followers }}<br><b>Followers</b></p>
                       </div>
                   </div>
                   <div id="followBtnDiv">
-                      <button id="followBtn" class="btn btn-primary" @click="" type="submit">Follow</button>
+                      <button v-if="info.followed" id="followBtn" class="btn btn-primary" @click="addFollow(info.id)" type="submit">Following</button>
+                      <button v-if="!info.followed" id="followBtn" class="btn btn-primary" @click="addFollow(info.id)" type="submit">Follow</button>
                   </div>
               </div>
           </div>
@@ -499,7 +500,8 @@ const userProfile = Vue.component('userProfile', {
     data: function() {
         return {
           posts: [],
-          info: {}
+          info: {},
+          response: null
         }
     },
     mounted: function() {
@@ -527,7 +529,49 @@ const userProfile = Vue.component('userProfile', {
           console.log(error);
         });
     },
-    methods: {}
+    methods: {
+      addFollow: function(user_id) {
+        let follow = {
+          "user_id": current_userid,
+          "follower_id": user_id
+        }
+        let self = this;
+        fetch("/api/users/"+user_id+"/follow", {
+          method: 'POST',
+          body: follow,
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization" :"Bearer " + jwt,
+            'X-CSRFToken': token
+          },
+          credentials: 'same-origin'
+        })
+          .then(function (response) {
+            self.response = response.json()
+            return fetch("/api/users/"+user_id+"/posts", {
+              method: 'GET',
+              headers: {
+                "Content-type": "application/json",
+                "Authorization" :"Bearer " + jwt
+              },
+            })
+            .then(function (response) {
+              return response.json();
+            })
+          })
+          .then(function (jsonResponse) {
+            // display a success message
+            console.log(jsonResponse);
+            self.posts = jsonResponse.details.posts;
+            self.info = jsonResponse.details.info;
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+      }
+    }
 });
 
 

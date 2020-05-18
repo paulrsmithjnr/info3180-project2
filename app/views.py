@@ -146,7 +146,7 @@ def posts(user_id):
         userPosts = Posts.query.filter_by(user_id=user_id).all()
         followersCount = Follows.query.filter_by(user_id=user_id).count()
         postsCount = Posts.query.filter_by(user_id=user_id).count()
-        findFollow = Follows.query.filter_by(user_id=current_user.id, follower_id=user_id).first()
+        findFollow = Follows.query.filter_by(user_id=user_id, follower_id=current_user.id).first()
         followFlag = False
         if findFollow is not None:
             followFlag = True
@@ -189,9 +189,9 @@ def posts(user_id):
 @app.route('/api/users/<user_id>/follow', methods=['POST'])
 @login_required
 def follow(user_id):
-    findFollow = Follows.query.filter_by(user_id=current_user.id, follower_id=user_id).first()
+    findFollow = Follows.query.filter_by(user_id=user_id, follower_id=current_user.id).first()
     if findFollow is None:
-        follow = Follows(user_id=current_user.user_id, follower_id=user_id)
+        follow = Follows(user_id=user_id, follower_id=current_user.id)
         db.session.add(follow)
         db.session.commit()
         succesMessage = {
@@ -199,7 +199,7 @@ def follow(user_id):
         }
         return jsonify(succesMessage=succesMessage)
     else:
-        Follows.query.filter_by(user_id=current_user.id, follower_id=user_id).delete()
+        Follows.query.filter_by(user_id=user_id, follower_id=current_user.id).delete()
         db.session.commit()
         succesMessage = {
             "message": "You are no longer following this user"

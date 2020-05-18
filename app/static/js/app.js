@@ -131,7 +131,7 @@ const registerForm = Vue.component('register-form', {
                       <label for="username"><b>Username</b></label> <input class="form-control" id="username" name="username" type="text" value="">
                   </div>
                   <div class="form-group">
-                      <label for="password"><b>Password</b></label> <input class="form-control" id="password" name="password" type="text" value="">
+                      <label for="password"><b>Password</b></label> <input class="form-control" id="password" name="password" type="password" value="">
                   </div>
                   <div class="form-group">
                       <label for="firstName"><b>First Name</b></label> <input class="form-control" id="firstName" name="firstName" type="text" value="">
@@ -214,8 +214,8 @@ const loginForm = Vue.component('login-form', {
         <div id="centerDiv">
             <div class="login-form center-block">
                 <div id = "message">
-                <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
-                <p class="alert alert-danger" v-if="outcome === 'singleError'" id = "error"> {{ errorMessage }} </p>
+                    <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
+                    <p class="alert alert-danger" v-if="outcome === 'singleError'" id = "error"> {{ errorMessage }} </p>
                     <ul class="alert alert-danger" v-if="outcome === 'multipleErrors'" id = "errors">
                         <li v-for="error in errors" class="news__item"> {{ error }}</li>
                     </ul> 
@@ -284,13 +284,13 @@ const loginForm = Vue.component('login-form', {
 
               self.errorMessage = jsonResponse.loginError.error;
               self.outcome = 'singleError';
-              displaySuccessMessage = false
+              self.success = false;
 
             } else if(jsonResponse.hasOwnProperty('loginErrors')) {
 
               self.errors = jsonResponse.loginErrors.errors;
               self.outcome = 'multipleErrors'
-              displaySuccessMessage = false
+              self.success = false;
 
             } else {
 
@@ -309,27 +309,12 @@ const loginForm = Vue.component('login-form', {
   });
 
 
-/*
-
-        <div id = "message">
-            <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
-        </div>
-        <div v-for="post in posts" class="card" style="width: 18rem;">
-            <h5 class="card-title"><b>{{ post.username }}</b></h5>
-            <img v-bind:src="post.photo" class="card-img-top" alt="photo"/>
-            <div class="card-body">
-                <p class="card-text">{{ post.caption }}</p> 
-                <p class="card-text">{{ post.created_on }}</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
-            </div>
-        </div>          
-          
-*/
-
-
 const explore = Vue.component('explore', {
     template: `          
     <div class="allPostsContainer">
+        <div id = "message">
+            <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
+        </div>
         <div id="allPostsGrid">
             <div id="allPosts">
                 <div v-for="post in posts" class="explorePost">
@@ -338,8 +323,8 @@ const explore = Vue.component('explore', {
                     <div class="explorePostBody">
                         <p class="explorePostText text-muted">{{ post.caption }}</p> 
                         <div id="likesdate">
-                            <button v-if="!post.liked" @click="sendLike(post.id)" id="blackText" class="btn btn-light" type="submit"><img id="likesicon" src="../static/images/heart.png" /> {{ post.likes }} Likes</button>
-                            <button v-if="post.liked" @click="sendLike(post.id)" id="blackText" class="btn btn-danger" type="submit"><img id="likesicon" src="../static/images/heart.png" /> {{ post.likes }} Likes</button>
+                            <button v-if="!post.liked" @click="addLike(post.id)" id="blackText" class="btn btn-light" type="submit"><img id="likesicon" src="../static/images/heart.png" /> {{ post.likes }} Likes</button>
+                            <button v-if="post.liked" @click="removeLike(post.id)" id="blackText" class="btn btn-danger" type="submit"><img id="likesicon" src="../static/images/heart.png" /> {{ post.likes }} Likes</button>
                             <p class="explorePostText text-muted"><b><i>{{ post.created_on }}</i></b></p>
                         </div>
                     </div>
@@ -355,8 +340,7 @@ const explore = Vue.component('explore', {
         return {
           posts: [],
           message: '',
-          success: false,
-          response: null
+          success: false
         }
     },
     mounted: function() {
@@ -388,7 +372,7 @@ const explore = Vue.component('explore', {
         });
     },
     methods: {
-      sendLike: function(post_id) {
+      addLike: function(post_id) {
         let like = {
           "user_id": current_userid,
           "post_id": post_id
@@ -405,7 +389,6 @@ const explore = Vue.component('explore', {
           credentials: 'same-origin'
         })
           .then(function (response) {
-            self.response = response.json()
             return fetch("/api/posts", {
               method: 'GET',
               headers: {
@@ -422,6 +405,50 @@ const explore = Vue.component('explore', {
             console.log(jsonResponse);
             self.posts = jsonResponse.posts.posts;
             self.likes = jsonResponse.posts.likes;
+            self.success = true;
+            self.message = 'Post liked!';
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+      },
+      removeLike: function(post_id) {
+        let like = {
+          "user_id": current_userid,
+          "post_id": post_id
+        }
+        let self = this;
+        fetch("/api/posts/"+post_id+"/like", {
+          method: 'POST',
+          body: like,
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization" :"Bearer " + jwt,
+            'X-CSRFToken': token
+          },
+          credentials: 'same-origin'
+        })
+          .then(function (response) {
+            return fetch("/api/posts", {
+              method: 'GET',
+              headers: {
+                "Content-type": "application/json",
+                "Authorization" :"Bearer " + jwt
+              },
+            })
+            .then(function (response) {
+              return response.json();
+            });
+          })
+          .then(function (jsonResponse) {
+            // display a success message
+            console.log(jsonResponse);
+            self.posts = jsonResponse.posts.posts;
+            self.likes = jsonResponse.posts.likes;
+            self.success = true;
+            self.message = 'Post unliked!';
 
           })
           .catch(function (error) {
@@ -451,7 +478,7 @@ const logout = Vue.component('logout', {
           console.log(jsonResponse);
           successMessage = jsonResponse.successMessage.message;
           displaySuccessMessage = true;
-          router.push('login')          
+          router.push('/login')
         })
         .catch(function (error) {
           console.log(error);
@@ -464,6 +491,9 @@ const logout = Vue.component('logout', {
 const userProfile = Vue.component('userProfile', {
     template: `          
     <div id="profileMainContainer" class="container">
+      <div id = "message">
+          <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
+      </div>
       <div  class="profileSubContainer">
           <div id="profile">
               <div id="profilePictureDiv">
@@ -484,7 +514,7 @@ const userProfile = Vue.component('userProfile', {
                       </div>
                   </div>
                   <div v-if="!isCurrentUser" id="followBtnDiv">
-                      <button v-if="info.followed" id="followBtn" class="btn btn-success" @click="addFollow(info.id)" type="submit">Following</button>
+                      <button v-if="info.followed" id="followBtn" class="btn btn-success" @click="removeFollow(info.id)" type="submit">Following</button>
                       <button v-if="!info.followed" id="followBtn" class="btn btn-primary" @click="addFollow(info.id)" type="submit">Follow</button>
                   </div>
               </div>
@@ -507,8 +537,9 @@ const userProfile = Vue.component('userProfile', {
         return {
           posts: [],
           info: {},
-          response: null,
-          isCurrentUser: false
+          isCurrentUser: false,
+          message: '',
+          success: false
         }
     },
     mounted: function() {
@@ -540,6 +571,52 @@ const userProfile = Vue.component('userProfile', {
         });
     },
     methods: {
+      removeFollow: function(user_id) {
+        let follow = {
+          "user_id": current_userid,
+          "follower_id": user_id
+        }
+        let self = this;
+        fetch("/api/users/"+user_id+"/follow", {
+          method: 'POST',
+          body: follow,
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization" :"Bearer " + jwt,
+            'X-CSRFToken': token
+          },
+          credentials: 'same-origin'
+        })
+          .then(function (response) {
+            self.response = response.json()
+            return fetch("/api/users/"+user_id+"/posts", {
+              method: 'GET',
+              headers: {
+                "Content-type": "application/json",
+                "Authorization" :"Bearer " + jwt
+              },
+            })
+            .then(function (response) {
+              return response.json();
+            })
+          })
+          .then(function (jsonResponse) {
+            // display a success message
+            console.log(jsonResponse);
+            self.posts = jsonResponse.details.posts;
+            self.info = jsonResponse.details.info;
+            if(current_userid==user_id) {
+              self.isCurrentUser = true;
+            }
+            self.success = true;
+            self.message = 'You are no longer following this user';
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+      },
       addFollow: function(user_id) {
         let follow = {
           "user_id": current_userid,
@@ -577,6 +654,8 @@ const userProfile = Vue.component('userProfile', {
             if(current_userid==user_id) {
               self.isCurrentUser = true;
             }
+            self.success = true;
+            self.message = 'You are now following this user';
 
           })
           .catch(function (error) {

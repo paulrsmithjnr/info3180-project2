@@ -179,10 +179,10 @@ def posts(user_id):
             }
             postsList.append(currentPost)
 
-            details = {
-                "posts": postsList,
-                "info": userInfo
-            }           
+        details = {
+            "posts": postsList,
+            "info": userInfo
+        }           
         return jsonify(details=details)
 
 

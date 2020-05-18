@@ -118,3 +118,78 @@ body {
     font-weight: bold;
     width: fit-content;
 }
+
+#icon {
+    height: 25px;
+    width: auto;
+}
+
+#loginLogo {
+    height: 75px;
+    width: auto;
+}
+
+.login-form, #postFormDiv{
+    width: 550px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    background-color: white;
+    margin: 40px;
+    padding: 40px;
+    border-radius: 40px;
+}
+
+.register-form{
+    width: 750px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    background-color: white;
+    margin: 40px;
+    padding: 40px;
+    border-radius: 40px;
+}
+
+#centerDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#homeDiv {
+    display: grid;
+    grid-template-columns: 49% 49%;
+    grid-column-gap:2%;
+    height: fit-content;
+}
+
+#homeImage {
+    width: 100%;
+    height: auto;
+}
+
+#homeIntroDiv {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 40% 30% 20%;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    background-color: white;
+    padding: 40px;
+}
+
+#homeHeadingDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 2px solid lightgray;
+    margin-bottom: 30px;
+}
+
+#homeImage {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+#homeBtnsDiv {
+    display: grid;
+    grid-template-columns: 49% 49%;
+    grid-column-gap: 2%;
+    height: fit-content;
+}

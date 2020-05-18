@@ -6,7 +6,7 @@ let displaySuccessMessage = false;
 Vue.component('app-header', {
     template: `
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <a class="navbar-brand" href="/explore"><b>Photogram</b></a>
+      <a class="navbar-brand" href="/explore"><img id="icon" src="../static/images/photogram.png" alt="Logo"/> <b>Photogram</b></a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -45,26 +45,29 @@ Vue.component('app-footer', {
 
 const postForm = Vue.component('post-form', {
   template: `
-      <div id="postFormDiv">
-          <div id = "message">
-              <ul class="alert alert-danger" v-if="outcome === 'failure'" id = "errors">
-                  <li v-for="error in errors" class="news__item"> {{ error }}</li>
-              </ul> 
+      <div id="centerDiv">
+          <div id="postFormDiv">
+              <div id = "message">
+                  <ul class="alert alert-danger" v-if="outcome === 'failure'" id = "errors">
+                      <li v-for="error in errors" class="news__item"> {{ error }}</li>
+                  </ul> 
+              </div>
+              <h1><b>New Post</b></h1><br>
+              <form id="uploadForm" @submit.prevent="uploadPhoto" method="POST" enctype="multipart/form-data">
+                  
+                  <div class="form-group">
+                      <label for="photo"><b>Photo</b></label>
+                      <input class="form-control" id="photo" name="photo" type="file">
+                  </div>
+
+                  <div class="form-group">
+                      <label for="description"><b>Description</b></label> <textarea class="form-control" id="description" name="description"></textarea>
+                  </div>
+
+                  <button type="submit" name="submit" class="btn btn-primary btn-block"><b>UPLOAD</b></button>
+
+              </form>
           </div>
-          <form id="uploadForm" @submit.prevent="uploadPhoto" method="POST" enctype="multipart/form-data">
-
-              <div class="form-group">
-                  <label for="description">Description</label> <textarea class="form-control" id="description" name="description"></textarea>
-              </div>
-              
-              <div class="form-group">
-                  <label for="photo">Profile Photo</label>
-                  <input class="form-control" id="photo" name="photo" type="file">
-              </div>
-
-              <button type="submit" name="submit">Upload</button>
-
-          </form>
       </div>
   `,
   data: function() {
@@ -114,50 +117,49 @@ const postForm = Vue.component('post-form', {
 const registerForm = Vue.component('register-form', {
   template: `          
   <div class="container">
-          
-      <div class="register-form center-block">
-          <h2>User Registration</h2>
-          <div id = "message">
-              <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
-              <ul class="alert alert-danger" v-if="outcome === 'failure'" id = "errors">
-                  <li v-for="error in errors" class="news__item"> {{ error }}</li>
-              </ul> 
-          </div>
-          <form id="registerForm" @submit.prevent="registerUser" method="post" enctype="multipart/form-data">
-              <div class="form-group">
-                  <label for="username">Username</label> <input class="form-control" id="username" name="username" type="text" value="">
+      <div id="centerDiv">
+          <div class="register-form center-block">
+              <div id = "message">
+                  <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
+                  <ul class="alert alert-danger" v-if="outcome === 'failure'" id = "errors">
+                      <li v-for="error in errors" class="news__item"> {{ error }}</li>
+                  </ul> 
               </div>
-              <div class="form-group">
-                  <label for="password">Password</label> <input class="form-control" id="password" name="password" type="text" value="">
-              </div>
-              <div class="form-group">
-                  <label for="firstName">First Name</label> <input class="form-control" id="firstName" name="firstName" type="text" value="">
-              </div>
-              <div class="form-group">
-                  <label for="lastName">Last Name</label> <input class="form-control" id="lastName" name="lastName" type="text" value="">
-              </div>
-              <div class="form-group">
-                  <label for="email">E-mail</label> <input class="form-control" id="email" name="email" type="text" value="">
-              </div>
-              <div class="form-group">
-                  <label for="location">Location</label> <input class="form-control" id="location" name="location" type="text" value="">
-              </div>
-              <div class="form-group">
-                  <label for="gender">Gender</label> <select class="form-control" id="gender" name="gender"><option value="Male">Male</option><option value="Female">Female</option></select>
-              </div>
-              <div class="form-group">
-                  <label for="biography">Biography</label> <textarea class="form-control" id="biography" name="biography"></textarea>
-              </div>
-              <div class="form-group">
-                  <label for="photo">Profile Photo</label>
-                  <input class="form-control" id="photo" name="photo" type="file">
-              </div>
-            
-              <button type="submit" name="submit">Register</button>
-          </form>
-    </div>
-
-
+              <h1><img id="loginLogo" src="../static/images/photogram.png" alt="Logo"/> <b>Photogram User Registration</b></h1><br>
+              <form id="registerForm" @submit.prevent="registerUser" method="post" enctype="multipart/form-data">
+                  <div class="form-group">
+                      <label for="username"><b>Username</b></label> <input class="form-control" id="username" name="username" type="text" value="">
+                  </div>
+                  <div class="form-group">
+                      <label for="password"><b>Password</b></label> <input class="form-control" id="password" name="password" type="text" value="">
+                  </div>
+                  <div class="form-group">
+                      <label for="firstName"><b>First Name</b></label> <input class="form-control" id="firstName" name="firstName" type="text" value="">
+                  </div>
+                  <div class="form-group">
+                      <label for="lastName"><b>Last Name</b></label> <input class="form-control" id="lastName" name="lastName" type="text" value="">
+                  </div>
+                  <div class="form-group">
+                      <label for="email"><b>E-mail</b></label> <input class="form-control" id="email" name="email" type="text" value="">
+                  </div>
+                  <div class="form-group">
+                      <label for="location"><b>Location</b></label> <input class="form-control" id="location" name="location" type="text" value="">
+                  </div>
+                  <div class="form-group">
+                      <label for="gender"><b>Gender</b></label> <select class="form-control" id="gender" name="gender"><option value="Male">Male</option><option value="Female">Female</option></select>
+                  </div>
+                  <div class="form-group">
+                      <label for="biography"><b>Biography</b></label> <textarea class="form-control" id="biography" name="biography"></textarea>
+                  </div>
+                  <div class="form-group">
+                      <label for="photo">Profile Photo</label>
+                      <input class="form-control"  id="photo" name="photo" type="file">
+                  </div>
+                
+                  <button type="submit" name="submit" class="btn btn-primary btn-block"><b>REGISTER</b></button>
+              </form>
+        </div>
+      </div>
   </div>
   `,
   data: function() {
@@ -209,26 +211,30 @@ const loginForm = Vue.component('login-form', {
     template: `
     <div class="container">
             
-        <div class="login-form center-block">
-            <h2>Please Log in</h2>
-            <div id = "message">
-            <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
-            <p class="alert alert-danger" v-if="outcome === 'singleError'" id = "error"> {{ errorMessage }} </p>
-                <ul class="alert alert-danger" v-if="outcome === 'multipleErrors'" id = "errors">
-                    <li v-for="error in errors" class="news__item"> {{ error }}</li>
-                </ul> 
+        <div id="centerDiv">
+            <div class="login-form center-block">
+                <div id = "message">
+                <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
+                <p class="alert alert-danger" v-if="outcome === 'singleError'" id = "error"> {{ errorMessage }} </p>
+                    <ul class="alert alert-danger" v-if="outcome === 'multipleErrors'" id = "errors">
+                        <li v-for="error in errors" class="news__item"> {{ error }}</li>
+                    </ul> 
+                </div>
+
+                <h1><img id="loginLogo" src="../static/images/photogram.png" alt="Logo"/> <b>Photogram Login</b></h1><br>
+                
+                <form id="loginForm"  @submit.prevent="loginUser" method="post">
+                    <div class="form-group">
+                        <label for="username"><b>Username</b></label>
+                        <input class="form-control" id="username" name="username" placeholder="Enter your username" type="text" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="password"><b>Password</b></label>
+                        <input class="form-control" id="password" name="password" type="password" placeholder="Enter your password" value="">
+                    </div>
+                    <button type="submit" name="submit" class="btn btn-primary btn-block"><b>LOG IN</b></button>
+                </form>
             </div>
-            <form id="loginForm"  @submit.prevent="loginUser" method="post">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input class="form-control" id="username" name="username" placeholder="Enter your username" type="text" value="">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input class="form-control" id="password" name="password" type="password" value="">
-                </div>
-                <button type="submit" name="submit" class="btn btn-primary btn-block">Log in</button>
-            </form>
         </div>
   
     </div>
@@ -478,7 +484,7 @@ const userProfile = Vue.component('userProfile', {
                       </div>
                   </div>
                   <div v-if="!isCurrentUser" id="followBtnDiv">
-                      <button v-if="info.followed" id="followBtn" class="btn btn-primary" @click="addFollow(info.id)" type="submit">Following</button>
+                      <button v-if="info.followed" id="followBtn" class="btn btn-success" @click="addFollow(info.id)" type="submit">Following</button>
                       <button v-if="!info.followed" id="followBtn" class="btn btn-primary" @click="addFollow(info.id)" type="submit">Follow</button>
                   </div>
               </div>
@@ -658,11 +664,22 @@ const myProfile = Vue.component('myProfile', {
 
 const Home = Vue.component('home', {
    template: `
-    <div class="jumbotron">
-        <h1>Photogram</h1>
-        <p class="lead">Share photos of your favorite moments with your family, friends and the world. </p>
-        <button id="homebtn_register"  @click="$router.push('register')" type="submit" name="submit">Register</button>
-        <button id="homebtn_login" @click="$router.push('login')" type="submit" name="submit">Login</button>
+    <div id="homeDiv">
+        <div id="homeImageDiv">
+            <img id="homeImage" src="../static/images/home.jpg" alt="Home Image"/>
+        </div>
+
+        <div id="homeIntroDiv">
+            <div id="homeHeadingDiv">
+                <h1><img id="loginLogo" src="../static/images/photogram.png" alt="Logo"/> <b>Photogram</b></h1>
+            </div>
+            <p class="lead">Share photos of your favorite moments with your family, friends and the world. </p>
+            <div id="homeBtnsDiv">
+                <button id="homebtn_register" class="btn btn-success" @click="$router.push('register')" type="submit" name="submit"><b>REGISTER</b></button>
+                <button id="homebtn_login" class="btn btn-primary" @click="$router.push('login')" type="submit" name="submit"><b>LOGIN</b></button>
+            </div>
+        </div>
+        
     </div>
    `,
     data: function() {

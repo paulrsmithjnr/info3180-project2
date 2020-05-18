@@ -1,16 +1,18 @@
 /* Add your Application JavaScript */
 var jwt;
 let successMessage;
+let dangerMessage
 let displaySuccessMessage = false;
+let displayDangerMessage = false;
 
 Vue.component('app-header', {
     template: `
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <a class="navbar-brand" href="/explore"><img id="icon" src="../static/images/photogram.png" alt="Logo"/> <b>Photogram</b></a>
+      <a class="navbar-brand" href="/"><img id="icon" src="../static/images/photogram.png" alt="Logo"/> <b>Photogram</b></a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+          <span class="navbar-toggler-icon"></span>
       </button>
-    
+
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
@@ -341,12 +343,19 @@ const explore = Vue.component('explore', {
         return {
           posts: [],
           message: '',
-          success: false
+          success: false,
+          danger: false
         }
     },
     mounted: function() {
   
       let self = this;
+      let router = this.$router;
+      if(current_userid==0) {
+          displayDangerMessage = true;
+          dangerMessage = 'You are logged out! Please login before trying to view \"Explore\".';
+        router.push("/")
+      } else {
       fetch("/api/posts", {
           method: 'GET',
           headers: {
@@ -371,6 +380,7 @@ const explore = Vue.component('explore', {
         .catch(function (error) {
           console.log(error);
         });
+      }
     },
     methods: {
       addLike: function(post_id) {
@@ -466,6 +476,11 @@ const logout = Vue.component('logout', {
     mounted: function() {
   
       let self = this;
+      if(current_userid==0) {
+        displayDangerMessage = true;
+        dangerMessage = 'You are already logged out!';
+        router.push("/")
+      } else {
       fetch("/api/auth/logout", {
           method: 'GET',
           headers: {
@@ -479,11 +494,13 @@ const logout = Vue.component('logout', {
           console.log(jsonResponse);
           successMessage = jsonResponse.successMessage.message;
           displaySuccessMessage = true;
+          current_userid = 0;
           router.push('/login')
         })
         .catch(function (error) {
           console.log(error);
         });
+      }
     },
     methods: {}
   });
@@ -716,7 +733,11 @@ const myProfile = Vue.component('myProfile', {
 
     let self = this;
 
-    //fetches the user's posts
+    if(current_userid==0) {
+        displayDangerMessage = true;
+        dangerMessage = 'You are logged out! Please login before trying to view \"My Profile\".';
+      router.push("/")
+    } else {
     fetch("/api/users/"+current_userid+"/posts", {
         method: 'GET',
         headers: {
@@ -736,6 +757,7 @@ const myProfile = Vue.component('myProfile', {
       .catch(function (error) {
         console.log(error);
       });
+    }
   },
   methods: {}
 });
@@ -744,27 +766,43 @@ const myProfile = Vue.component('myProfile', {
 
 const Home = Vue.component('home', {
    template: `
-    <div id="homeDiv">
-        <div id="homeImageDiv">
-            <img id="homeImage" src="../static/images/home.jpg" alt="Home Image"/>
+   <div>
+      <div id = "message">
+          <p class="alert alert-danger" v-if="danger" id = "success"> {{ message }} </p>
         </div>
+        <div id="homeDiv">
+            <div id="homeImageDiv">
+              <img id="homeImage" src="../static/images/home.jpg" alt="Home Image"/>
+            </div>
 
-        <div id="homeIntroDiv">
-            <div id="homeHeadingDiv">
-                <h1><img id="loginLogo" src="../static/images/photogram.png" alt="Logo"/> <b>Photogram</b></h1>
+            <div id="homeIntroDiv">
+                <div id="homeHeadingDiv">
+                    <h1><img id="loginLogo" src="../static/images/photogram.png" alt="Logo"/> <b>Photogram</b></h1>
+                </div>
+                <p class="lead">Share photos of your favorite moments with your family, friends and the world. </p>
+                <div id="homeBtnsDiv">
+                    <button id="homebtn_register" class="btn btn-success" @click="$router.push('register')" type="submit" name="submit"><b>REGISTER</b></button>
+                    <button id="homebtn_login" class="btn btn-primary" @click="$router.push('login')" type="submit" name="submit"><b>LOGIN</b></button>
+                </div>
             </div>
-            <p class="lead">Share photos of your favorite moments with your family, friends and the world. </p>
-            <div id="homeBtnsDiv">
-                <button id="homebtn_register" class="btn btn-success" @click="$router.push('register')" type="submit" name="submit"><b>REGISTER</b></button>
-                <button id="homebtn_login" class="btn btn-primary" @click="$router.push('login')" type="submit" name="submit"><b>LOGIN</b></button>
-            </div>
+
         </div>
-        
-    </div>
+   </div>
    `,
     data: function() {
-       return {}
-    }
+       return {
+         danger: false,
+         message: ''
+       }
+    },
+    mounted: function() {
+      let self = this;
+      if(displayDangerMessage){
+        displayDangerMessage = false;
+        self.danger = true;
+        self.message = dangerMessage;
+      }
+   }
 });
 
 const NotFound = Vue.component('not-found', {

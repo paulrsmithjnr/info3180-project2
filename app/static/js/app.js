@@ -284,9 +284,17 @@ const explore = Vue.component('explore', {
         <div id = "message">
             <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
         </div>
-        <ul>
-            <li v-for="post in posts">{{ post.caption }}</li>
-        </ul>      
+        
+        <div v-for="post in posts" class="card" style="width: 18rem;">
+            <h5 class="card-title">{{ post.username }}</h5>
+            <img v-bind:src="post.photo" class="card-img-top" alt="photo"/>
+            <div class="card-body">
+                <p class="card-text">{{ post.caption }}</p> 
+                <p class="card-text">{{ post.created_on }}</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+            </div>
+        </div>
+
     </div>
     `,
     data: function() {
@@ -448,7 +456,9 @@ const Home = Vue.component('home', {
    template: `
     <div class="jumbotron">
         <h1>Photogram</h1>
-        <p class="lead">Remember to change this to something photogram related as well as to add a login and register button</p>
+        <p class="lead">Share photos of your favorite moments with your family, friends and the world. </p>
+        <button id="homebtn_register"  @click="$router.push('register')" type="submit" name="submit">Register</button>
+        <button id="homebtn_login" @click="$router.push('login')" type="submit" name="submit">Login</button>
     </div>
    `,
     data: function() {

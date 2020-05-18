@@ -13,7 +13,7 @@ class Posts(db.Model):
 
     def __init__(self, user_id, photo, caption):
         self.user_id = user_id
-        self.photo = photo
+        self.photo = "./static/uploads/" + photo
         self.caption = caption
         self.created_on = datetime.now().strftime("%B %d, %Y")
         
@@ -60,7 +60,7 @@ class Users(db.Model):
         self.email = email
         self.location = location
         self.biography = biography
-        self.profile_picture = profile_picture
+        self.profile_picture = "./static/uploads/" + profile_picture
         self.joined_on = datetime.now().strftime("%B %d, %Y")
         
 

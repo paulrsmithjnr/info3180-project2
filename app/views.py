@@ -195,13 +195,16 @@ def allposts():
     postsList = []
     for post in allPosts:
         likeCount = Likes.query.filter_by(post_id=post.id).count()
+        user = Users.query.filter_by(id=post.user_id).first()
         currentPost = {
             "id": post.id,
             "user_id": post.user_id,
             "photo": post.photo,
             "caption": post.caption,
             "created_on": post.created_on,
-            "likes": likeCount
+            "likes": likeCount,
+            "username": user.username,
+            "profile_picture": user.profile_picture
         }
         postsList.append(currentPost)
     posts = {

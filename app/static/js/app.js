@@ -543,7 +543,7 @@ const userProfile = Vue.component('userProfile', {
           <div id="userPostsDiv">
               <ul id="postsList">
                   <li v-for="post in posts" id="postItem">
-                      <img class="posts" v-bind:src="post.photo" alt="picture"/>
+                  <button @click="$router.push({ name: 'post', params: { post_id: post.id } })" type="button" class="btn btn-link"><img class="posts" v-bind:src="post.photo" alt="picture"/></button>
                   </li>
               </ul>
           </div>
@@ -715,7 +715,7 @@ const myProfile = Vue.component('myProfile', {
           <div id="userPostsDiv">
               <ul id="postsList">
                   <li v-for="post in posts" id="postItem">
-                      <img class="posts" v-bind:src="post.photo" alt="picture"/>
+                      <button @click="$router.push({ name: 'post', params: { post_id: post.id } })" type="button" class="btn btn-link"><img class="posts" v-bind:src="post.photo" alt="picture"/></button>
                   </li>
               </ul>
           </div>
@@ -762,7 +762,144 @@ const myProfile = Vue.component('myProfile', {
   methods: {}
 });
   
+const singlePost = Vue.component('singlePost', {
+  template: `          
+  <div id="centerPostDiv" >
+      <div id="allPosts">
+        <div id = "message">
+            <p class="alert alert-success" v-if="success" id = "success"> {{ message }} </p>
+        </div>
+        <div class="explorePost">
+            <button @click="$router.push({ name: 'user', params: { user_id: post.user_id } })" id="blackText" type="button" class="btn btn-link explorePostHead"><h5 ><img v-bind:src="post.profile_picture" class="explorePostProfilePhoto" alt="photo"/><b>{{ post.username }}</b></h5></button>
+            <img v-bind:src="post.photo" class="explorePostPhoto" alt="photo"/>
+            <div class="explorePostBody">
+                <p class="explorePostText text-muted">{{ post.caption }}</p> 
+                <div id="likesdate">
+                    <button v-if="!post.liked" @click="addLike(post.id)" id="blackText" class="btn btn-light" type="submit"><img id="likesicon" src="../static/images/heart.png" /> {{ post.likes }} Likes</button>
+                    <button v-if="post.liked" @click="removeLike(post.id)" id="blackText" class="btn btn-danger" type="submit"><img id="likesicon" src="../static/images/heart.png" /> {{ post.likes }} Likes</button>
+                    <p class="explorePostText text-muted"><b><i>{{ post.created_on }}</i></b></p>
+                </div>
+            </div>
+        </div> 
+      </div>
+            
+  </div>
+  `,
+  data: function() {
+      return {
+        post: {},
+        success: false,
+        message: ''
+      }
+  },
+  mounted: function() {
 
+    let self = this;
+    let post_id = this.$route.params.post_id;
+    fetch("/api/posts/"+post_id, {
+        method: 'GET',
+        headers: {
+          "Content-type": "application/json",
+          "Authorization" :"Bearer " + jwt
+        },
+      })
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (jsonResponse) {
+        console.log(jsonResponse);  
+        self.post = jsonResponse.currentPost;
+        
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  },
+  methods: {
+    addLike: function(post_id) {
+      let like = {
+        "user_id": current_userid,
+        "post_id": post_id
+      }
+      let self = this;
+      fetch("/api/posts/"+post_id+"/like", {
+        method: 'POST',
+        body: like,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization" :"Bearer " + jwt,
+          'X-CSRFToken': token
+        },
+        credentials: 'same-origin'
+      })
+        .then(function (response) {
+          return fetch("/api/posts/"+post_id, {
+            method: 'GET',
+            headers: {
+              "Content-type": "application/json",
+              "Authorization" :"Bearer " + jwt
+            },
+          })
+          .then(function (response) {
+            return response.json();
+          });
+        })
+        .then(function (jsonResponse) {
+          // display a success message
+          console.log(jsonResponse);
+          self.post = jsonResponse.currentPost;
+          self.success = true;
+          self.message = 'Post liked!';
+
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+    },
+    removeLike: function(post_id) {
+      let like = {
+        "user_id": current_userid,
+        "post_id": post_id
+      }
+      let self = this;
+      fetch("/api/posts/"+post_id+"/like", {
+        method: 'POST',
+        body: like,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization" :"Bearer " + jwt,
+          'X-CSRFToken': token
+        },
+        credentials: 'same-origin'
+      })
+        .then(function (response) {
+          return fetch("/api/posts/"+post_id, {
+            method: 'GET',
+            headers: {
+              "Content-type": "application/json",
+              "Authorization" :"Bearer " + jwt
+            },
+          })
+          .then(function (response) {
+            return response.json();
+          });
+        })
+        .then(function (jsonResponse) {
+          // display a success message
+          console.log(jsonResponse);
+          self.post = jsonResponse.currentPost;
+          self.success = true;
+          self.message = 'Post unliked!';
+
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+    }
+  }
+});
 
 const Home = Vue.component('home', {
    template: `
@@ -829,6 +966,7 @@ const router = new VueRouter({
         {path: "/explore", component: explore},
         {path: "/users/:user_id", name: 'user' ,component: userProfile},
         {path: "/myprofile", component: myProfile},
+        {path: "/posts/:post_id", name: 'post', component: singlePost},
         {path: "/logout", component: logout},
         
         // This is a catch all route in case none of the above matches

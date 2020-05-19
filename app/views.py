@@ -215,6 +215,35 @@ def follow(user_id):
         return jsonify(succesMessage=succesMessage)
 
 
+@app.route('/api/posts/<post_id>', methods=['GET'])
+@login_required
+def singlePost(post_id):
+    post = Posts.query.filter_by(id=post_id).first()
+
+    likeFlag = False
+    likeCount = Likes.query.filter_by(post_id=post.id).count()
+
+    user = Users.query.filter_by(id=post.user_id).first()
+
+    findLike = Likes.query.filter_by(user_id=current_user.id, post_id=post.id).first()
+    if findLike is not None:
+        likeFlag = True
+
+    currentPost = {
+        "id": post.id,
+        "user_id": post.user_id,
+        "photo": post.photo,
+        "caption": post.caption,
+        "created_on": post.created_on,
+        "likes": likeCount,
+        "username": user.username,
+        "profile_picture": user.profile_picture,
+        "liked": likeFlag
+    }
+
+    return jsonify(currentPost=currentPost)
+
+
 @app.route('/api/posts', methods=['GET'])
 @login_required
 def allposts():

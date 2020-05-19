@@ -153,6 +153,13 @@ body {
     align-items: center;
 }
 
+#centerPostDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
 #homeDiv {
     display: grid;
     grid-template-columns: 49% 49%;

@@ -796,7 +796,7 @@ const singlePost = Vue.component('singlePost', {
 
     let self = this;
     let post_id = this.$route.params.post_id;
-    fetch("/api/posts/"+post_id, {
+    fetch("/api/post/"+post_id, {
         method: 'GET',
         headers: {
           "Content-type": "application/json",

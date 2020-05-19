@@ -13,10 +13,12 @@ csrf = CSRFProtect(app)
 app.config['SECRET_KEY'] = SECRET_KEY
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://photogram:photogram@localhost/photogram"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://user:password@host/databasename"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True # added just to suppress a warning
 
 db = SQLAlchemy(app)
-# db.create_all()
+
 # Flask-Login login manager
 login_manager = LoginManager()
 login_manager.init_app(app)

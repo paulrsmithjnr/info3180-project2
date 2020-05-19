@@ -215,7 +215,7 @@ def follow(user_id):
         return jsonify(succesMessage=succesMessage)
 
 
-@app.route('/api/posts/<post_id>', methods=['GET'])
+@app.route('/api/post/<post_id>', methods=['GET'])
 @login_required
 def singlePost(post_id):
     post = Posts.query.filter_by(id=post_id).first()

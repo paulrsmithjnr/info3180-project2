@@ -244,6 +244,26 @@ def singlePost(post_id):
     return jsonify(currentPost=currentPost)
 
 
+@app.route('/api/users/<user_id>/followers', methods=['GET'])
+@login_required
+def followers(user_id):
+    followers = Follows.query.filter_by(user_id=user_id).all()
+
+    followersList = []
+    if followers is not None:
+        for follower in followers:
+            user = Users.query.filter_by(id=follower.follower_id).first()
+            currentFollower = {
+                "username": user.username,
+                "photo": user.profile_picture
+            }
+            followersList.append(currentFollower)
+    allfollowers = {
+        "followers": followersList
+    }
+    return jsonify(allfollowers=allfollowers)
+
+
 @app.route('/api/posts', methods=['GET'])
 @login_required
 def allposts():

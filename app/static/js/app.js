@@ -704,7 +704,7 @@ const myProfile = Vue.component('myProfile', {
                           <p>{{ info.posts }}<br><b>Posts</b></p>
                       </div>
                       <div id="followersNum">
-                          <p>{{ info.followers }}<br><b>Followers</b></p>
+                      <p>{{ info.followers }}<br><b>Followers</b></p>
                       </div>
                   </div>
               </div>
@@ -901,6 +901,55 @@ const singlePost = Vue.component('singlePost', {
   }
 });
 
+// const followers = Vue.component('followers', {
+//   template: `          
+//   <div id="centerPostDiv" >
+//       <div>
+//           <div id="followerDiv" v-for="follower in followers">
+//           <img :src="follower.photo" alt="photo"/>
+//               <div id="followerPhoto">
+                 
+//               </div>
+
+//               <div id="followerName">
+//                   <a><h2><b>{{ follower.username }}</b></h2></a>
+//               </div>
+
+//           </div>
+//       </div>
+//   </div>
+//   `,
+//   data: function() {
+//       return {
+//         followers: []
+//       }
+//   },
+//   mounted: function() {
+
+//     let self = this;
+//     let user_id = this.$route.params.user_id;
+//     fetch("/api/users/"+user_id+"/followers", {
+//         method: 'GET',
+//         headers: {
+//           "Content-type": "application/json",
+//           "Authorization" :"Bearer " + jwt
+//         },
+//       })
+//       .then(function (response) {
+//         return response.json();
+//       })
+//       .then(function (jsonResponse) {
+//         console.log(jsonResponse);  
+//         self.followers = jsonResponse.allfollowers.followers;
+        
+//       })
+//       .catch(function (error) {
+//         console.log(error);
+//       });
+//   },
+//   methods: {}
+// });
+
 const Home = Vue.component('home', {
    template: `
    <div>
@@ -967,6 +1016,7 @@ const router = new VueRouter({
         {path: "/users/:user_id", name: 'user' ,component: userProfile},
         {path: "/myprofile", component: myProfile},
         {path: "/posts/:post_id", name: 'post', component: singlePost},
+        // {path: "/users/:user_id/followers", name: 'followers', component: followers},
         {path: "/logout", component: logout},
         
         // This is a catch all route in case none of the above matches

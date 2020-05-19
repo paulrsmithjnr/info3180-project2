@@ -2,11 +2,13 @@
 
 Share photos of your favourite moments with friends, family and the world.
 
-**NB: This is my group's code for the INFO3180 Project 2**
+*NB: This is my group's code for the INFO3180 Project 2*
 
-Group Members: 
+**Group Members:** 
 * Monique Satchwell
 * Paul Smith
+
+
 
 
 # HEROKU DEPLOYMENT

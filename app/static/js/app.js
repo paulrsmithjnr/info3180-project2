@@ -816,13 +816,13 @@ const singlePost = Vue.component('singlePost', {
       });
   },
   methods: {
-    addLike: function(post_id) {
+    addLike: function(postid) {
       let like = {
         "user_id": current_userid,
-        "post_id": post_id
+        "post_id": postid
       }
       let self = this;
-      fetch("/api/posts/"+post_id+"/like", {
+      fetch("/api/posts/"+postid+"/like", {
         method: 'POST',
         body: like,
         headers: {
@@ -833,7 +833,7 @@ const singlePost = Vue.component('singlePost', {
         credentials: 'same-origin'
       })
         .then(function (response) {
-          return fetch("/api/posts/"+post_id, {
+          return fetch("/api/post/"+postid, {
             method: 'GET',
             headers: {
               "Content-type": "application/json",
@@ -857,13 +857,13 @@ const singlePost = Vue.component('singlePost', {
         });
 
     },
-    removeLike: function(post_id) {
+    removeLike: function(postid) {
       let like = {
         "user_id": current_userid,
-        "post_id": post_id
+        "post_id": postid
       }
       let self = this;
-      fetch("/api/posts/"+post_id+"/like", {
+      fetch("/api/posts/"+postid+"/like", {
         method: 'POST',
         body: like,
         headers: {
@@ -874,7 +874,7 @@ const singlePost = Vue.component('singlePost', {
         credentials: 'same-origin'
       })
         .then(function (response) {
-          return fetch("/api/posts/"+post_id, {
+          return fetch("/api/post/"+postid, {
             method: 'GET',
             headers: {
               "Content-type": "application/json",

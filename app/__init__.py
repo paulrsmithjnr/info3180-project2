@@ -12,8 +12,8 @@ app = Flask(__name__)
 csrf = CSRFProtect(app)
 app.config['SECRET_KEY'] = SECRET_KEY
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://photogram:photogram@localhost/photogram"
-# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://photogram:photogram@localhost/photogram"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://wesqvyndnmnwdh:a7b8e83d1b4d5bad3dc27ad9fdeff08d16561b0b2d841414bfa8f1d55b7d5692@ec2-35-171-31-33.compute-1.amazonaws.com:5432/deo04ed06l395i"
 # app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://user:password@host/databasename"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True # added just to suppress a warning
 
